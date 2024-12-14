@@ -124,6 +124,8 @@
             border-radius: 8px;
             max-width: 400px;
             text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal-content h2 {
@@ -133,12 +135,13 @@
 
         .modal-buttons {
             display: flex;
-            gap: 10px;
-            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
             margin-top: 20px;
         }
 
         .modal-buttons button {
+            width: 100%;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
@@ -146,10 +149,37 @@
             color: white;
             cursor: pointer;
             transition: background 0.2s;
+            font-size: 14px;
         }
 
         .modal-buttons button:hover {
             background: #238579;
+            transform: translateY(-1px);
+        }
+
+        /* Add different colors for different actions */
+        .modal-buttons button[data-action="investigate"] {
+            background: #2a9d8f;  /* Teal for investigation */
+        }
+
+        .modal-buttons button[data-action="pay"] {
+            background: #2d6a4f;  /* Green for pay */
+        }
+
+        .modal-buttons button[data-action="deny"] {
+            background: #e76f51;  /* Orange-red for deny */
+        }
+
+        .modal-buttons button[data-action="investigate"]:hover {
+            background: #238579;
+        }
+
+        .modal-buttons button[data-action="pay"]:hover {
+            background: #1b4332;
+        }
+
+        .modal-buttons button[data-action="deny"]:hover {
+            background: #d65f3f;
         }
 
         #claims-queue {
@@ -233,6 +263,18 @@
         
         .claim-category strong {
             color: #2a9d8f;
+        }
+
+        .claim-details {
+            text-align: left;
+            margin: 10px 0;
+        }
+
+        .confidence-score {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            text-align: center;
         }
     </style>
 </head>

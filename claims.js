@@ -18,11 +18,12 @@ class Claim {
         }[this.type.name];
         
         this.legitimacy = Math.min(1, Math.max(0, baseChance + typeModifier));
-        this.investigationLevel = 0;
-        this.investigationCost = Math.round(amount * 0.1);
         
         // Generate specific details about the claim
         this.details = this.generateDetails();
+        
+        // Track which investigations have been performed
+        this.investigations = new Set();
     }
 
     generateClaimType() {
@@ -57,18 +58,25 @@ class Claim {
         };
     }
 
-    // Returns details based on investigation level
+    // Returns details based on completed investigations
     getVisibleDetails() {
-        const categories = ['documentation', 'medical', 'provider'];
         const visible = {};
-        
-        for (let i = 0; i < this.investigationLevel; i++) {
-            if (categories[i]) {
-                visible[categories[i]] = this.details[categories[i]];
-            }
-        }
-        
+        this.investigations.forEach(type => {
+            INVESTIGATION_TYPES[type].reveals.forEach(category => {
+                visible[category] = this.details[category];
+            });
+        });
         return visible;
+    }
+
+    // Can this type of investigation still be performed?
+    canInvestigate(type) {
+        return !this.investigations.has(type);
+    }
+
+    // Get cost for an investigation type
+    getInvestigationCost(type) {
+        return Math.round(INVESTIGATION_TYPES[type].cost(this.amount));
     }
 
     // Calculate confidence score based on visible details
@@ -171,29 +179,41 @@ class ClaimsManager {
         const confidenceEmoji = confidenceScore > 0.7 ? "✅" : 
                                confidenceScore > 0.3 ? "⚠️" : "❌";
         
+        // Generate investigation choices
+        const investigationChoices = Object.entries(INVESTIGATION_TYPES)
+            .filter(([type, _]) => claim.canInvestigate(type))
+            .map(([type, info]) => ({
+                text: `${info.emoji} ${info.name} ($${claim.getInvestigationCost(type)})`,
+                effect: () => this.investigateClaim(claimId, type)
+            }));
+        
         const claimEvent = {
             name: claim.type.name,
             emoji: claim.type.icon,
-            description: `
-                Amount: $${claim.amount.toLocaleString()}<br>
-                Type: ${claim.type.name}<br>
+            description: `<div class="claim-details">
+                <div>Amount: $${claim.amount.toLocaleString()}</div>
+                <div>Type: ${claim.type.name}</div>
                 ${detailsHtml}
-                ${claim.investigationLevel > 0 ? 
-                    `<br>Confidence: ${confidenceEmoji} ${Math.round(confidenceScore * 100)}%` : 
+                ${claim.investigations.size > 0 ? 
+                    `<div class="confidence-score">
+                        Confidence: ${confidenceEmoji} ${Math.round(confidenceScore * 100)}%
+                    </div>` : 
                     ''}
-            `,
+            </div>`,
             choices: [
-                ...(claim.investigationLevel < 3 ? [{
-                    text: `🔍 Investigate ($${claim.investigationCost})`,
-                    effect: () => this.investigateClaim(claimId)
-                }] : []),
+                ...investigationChoices.map(choice => ({
+                    ...choice,
+                    attributes: { 'data-action': 'investigate' }
+                })),
                 {
                     text: CLAIM_CHOICES.PAY,
-                    effect: () => this.resolveClaim(claimId, "approved")
+                    effect: () => this.resolveClaim(claimId, "approved"),
+                    attributes: { 'data-action': 'pay' }
                 },
                 {
                     text: CLAIM_CHOICES.DENY,
-                    effect: () => this.resolveClaim(claimId, "denied")
+                    effect: () => this.resolveClaim(claimId, "denied"),
+                    attributes: { 'data-action': 'deny' }
                 }
             ]
         };
@@ -201,12 +221,18 @@ class ClaimsManager {
         this.game.showEventModal(claimEvent);
     }
 
-    investigateClaim(claimId) {
+    investigateClaim(claimId, type) {
         const claim = this.activeClaims.get(claimId);
-        if (!claim || claim.investigationLevel >= 3) return;
+        if (!claim || !claim.canInvestigate(type)) return;
         
-        this.game.money -= claim.investigationCost;
-        claim.investigationLevel++;
+        const cost = claim.getInvestigationCost(type);
+        if (this.game.money < cost) {
+            this.game.showEventMessage("Not enough money for investigation! 💸");
+            return;
+        }
+        
+        this.game.money -= cost;
+        claim.investigations.add(type);
         this.handleClaim(claimId); // Show modal again with new info
     }
 
@@ -318,3 +344,25 @@ class ClaimsManager {
 
 // Export for use in game.js
 window.ClaimsManager = ClaimsManager;
+
+// Add specific investigation types with different costs/benefits
+const INVESTIGATION_TYPES = {
+    BASIC: {
+        name: "Basic Review",
+        cost: (amount) => amount * 0.05,  // 5% of claim
+        emoji: "📝",
+        reveals: ["documentation"]
+    },
+    MEDICAL: {
+        name: "Medical Review",
+        cost: (amount) => amount * 0.15,  // 15% of claim
+        emoji: "🔬",
+        reveals: ["medical"]
+    },
+    BACKGROUND: {
+        name: "Provider Check",
+        cost: (amount) => amount * 0.10,  // 10% of claim
+        emoji: "🔍",
+        reveals: ["provider"]
+    }
+};

@@ -277,6 +277,11 @@ class Game {
         event.choices.forEach(choice => {
             const button = document.createElement('button');
             button.textContent = choice.text;
+            if (choice.attributes) {
+                Object.entries(choice.attributes).forEach(([key, value]) => {
+                    button.setAttribute(key, value);
+                });
+            }
             button.onclick = () => {
                 const choiceSound = new Audio('popup.mp3');
                 choiceSound.volume = 0.1;
