@@ -125,6 +125,13 @@ class Game {
         this.publicOpinionDisplay = document.getElementById('public-opinion');
         this.opinionValueDisplay = document.getElementById('opinion-value');
         this.opinionTrendDisplay = document.getElementById('opinion-trend');
+
+        // Add milestone tracking
+        this.completedMilestones = new Set();
+        this.milestonesElement = document.getElementById('milestones-list');
+        
+        // Update milestones display every second
+        setInterval(() => this.checkMilestones(), 1000);
     }
 
     generateAutomaticPolicies() {
@@ -342,6 +349,151 @@ class Game {
 
         this.publicOpinion = Math.max(0, Math.min(100, this.publicOpinion + change));
         this.updateDisplay();
+    }
+
+    checkMilestones() {
+        Object.entries(MILESTONES).forEach(([id, milestone]) => {
+            if (this.completedMilestones.has(id)) return;
+
+            const meetsRequirements = 
+                (!milestone.policies || this.policies >= milestone.policies) &&
+                (!milestone.money || this.money >= milestone.money) &&
+                (!milestone.employees || this.upgrades.employee.count >= milestone.employees) &&
+                (!milestone.publicOpinion || this.publicOpinion <= milestone.publicOpinion);
+
+            if (meetsRequirements) {
+                this.completeMilestone(id, milestone);
+            }
+        });
+
+        this.updateMilestonesDisplay();
+    }
+
+    completeMilestone(id, milestone) {
+        this.completedMilestones.add(id);
+        
+        // Show achievement notification
+        this.showEventMessage(`🎯 Milestone: ${milestone.name}! ${milestone.reward}`);
+
+        // Play achievement sound
+        const sound = new Audio('popup.mp3');
+        sound.volume = 0.3;
+        sound.playbackRate = 1.5;
+        sound.play();
+    }
+
+    updateMilestonesDisplay() {
+        if (!this.milestonesElement) return;
+
+        // Get incomplete milestones and sort them by requirements
+        const incompleteMilestones = Object.entries(MILESTONES)
+            .filter(([id, _]) => !this.completedMilestones.has(id))
+            .sort(([_, a], [__, b]) => {
+                // Sort by policies first (if they have policy requirements)
+                if (a.policies && b.policies) {
+                    return a.policies - b.policies;
+                }
+                // Put milestones without policy requirements last
+                if (!a.policies) return 1;
+                if (!b.policies) return -1;
+                return 0;
+            });
+
+        // Take only the next two milestones
+        const nextMilestones = incompleteMilestones.slice(0, 2);
+        
+        // Always show completed milestones and next two
+        const milestoneHtml = [
+            // First show completed milestones
+            ...Object.entries(MILESTONES)
+                .filter(([id, _]) => this.completedMilestones.has(id))
+                .map(([id, milestone]) => `
+                    <div class="milestone-item completed">
+                        <div class="milestone-name">✅ ${milestone.name}</div>
+                        <div class="milestone-reward">Unlocked: ${milestone.reward}</div>
+                    </div>
+                `),
+            // Then show next two available
+            ...nextMilestones.map(([id, milestone]) => {
+                const progress = this.getMilestoneProgress(milestone);
+                return `
+                    <div class="milestone-item">
+                        <div class="milestone-name">${milestone.name}</div>
+                        <div class="milestone-description">${milestone.description}</div>
+                        <div class="milestone-progress">${progress}</div>
+                        <div class="milestone-reward">🎁 ${milestone.reward}</div>
+                    </div>
+                `;
+            })
+        ].join('');
+
+        this.milestonesElement.innerHTML = milestoneHtml;
+    }
+
+    getMilestoneProgress(milestone) {
+        const parts = [];
+        
+        if (milestone.policies) {
+            const current = Math.floor(this.policies);
+            const percentage = Math.min(100, (current / milestone.policies) * 100);
+            parts.push(`
+                <div class="progress-item">
+                    <div class="progress-label">
+                        Policies: ${current.toLocaleString()}/${milestone.policies.toLocaleString()}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `);
+        }
+        
+        if (milestone.money) {
+            const current = Math.floor(this.money);
+            const percentage = Math.min(100, (current / milestone.money) * 100);
+            parts.push(`
+                <div class="progress-item">
+                    <div class="progress-label">
+                        Money: $${current.toLocaleString()}/$${milestone.money.toLocaleString()}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `);
+        }
+        
+        if (milestone.employees) {
+            const current = this.upgrades.employee.count;
+            const percentage = Math.min(100, (current / milestone.employees) * 100);
+            parts.push(`
+                <div class="progress-item">
+                    <div class="progress-label">
+                        Employees: ${current}/${milestone.employees}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `);
+        }
+
+        if (milestone.publicOpinion) {
+            const current = Math.round(this.publicOpinion);
+            const percentage = Math.min(100, (current / milestone.publicOpinion) * 100);
+            parts.push(`
+                <div class="progress-item">
+                    <div class="progress-label">
+                        Public Opinion: ${current}/${milestone.publicOpinion}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `);
+        }
+
+        return parts.join('');
     }
 }
 

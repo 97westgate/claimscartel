@@ -33,6 +33,57 @@ const INITIAL_STATES = {
     }
 };
 
+const MILESTONES = {
+    SMALL_BUSINESS: {
+        name: "Small Insurance Business",
+        policies: 10,
+        description: "Handle your first claims",
+        reward: "Claims system unlocked"
+    },
+    REGIONAL_PLAYER: {
+        name: "Regional Player",
+        policies: 50,
+        description: "Start influencing public opinion",
+        reward: "Public opinion system unlocked"
+    },
+    CORPORATE_POWER: {
+        name: "Corporate Power",
+        policies: 100,
+        employees: 10,
+        description: "Your size attracts government attention",
+        reward: "Lobbying system unlocked"
+    },
+    CARTEL_STATUS: {
+        name: "Insurance Cartel",
+        policies: 200,
+        money: 100000,
+        publicOpinion: 30,
+        description: "Maximum profit, minimum payout",
+        reward: "Victory!"
+    }
+};
+
+// Track achievements
+const ACHIEVEMENTS = {
+    FIRST_DENIAL: {
+        name: "First Denial",
+        description: "Deny your first claim",
+        icon: "❌"
+    },
+    PERFECT_INVESTIGATION: {
+        name: "Perfect Investigation",
+        description: "Find all red flags in a fraudulent claim",
+        icon: "🔍"
+    },
+    PUBLIC_MANIPULATOR: {
+        name: "Public Manipulator",
+        description: "Maintain low public opinion while keeping high profits",
+        icon: "🎭"
+    }
+};
+
 // Export for use in other files
 window.CLAIM_CHOICES = CLAIM_CHOICES;
-window.INITIAL_STATES = INITIAL_STATES; 
+window.INITIAL_STATES = INITIAL_STATES;
+window.MILESTONES = MILESTONES;
+window.ACHIEVEMENTS = ACHIEVEMENTS; 

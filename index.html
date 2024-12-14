@@ -276,6 +276,78 @@
             border-top: 1px solid #eee;
             text-align: center;
         }
+
+        .milestones-panel {
+            margin-top: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .milestone-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
+
+        .milestone-item.completed {
+            background: #d4edda;
+            border-left: 4px solid #2a9d8f;
+        }
+
+        .milestone-name {
+            font-weight: bold;
+            color: #2a9d8f;
+        }
+
+        .milestone-progress {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .milestone-reward {
+            font-size: 0.8em;
+            color: #e76f51;
+            margin-top: 2px;
+        }
+
+        .progress-item {
+            margin: 4px 0;
+        }
+
+        .progress-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2a9d8f;
+            transition: width 0.5s ease-out;
+        }
+
+        .milestone-item.completed .progress-fill {
+            background: #2d6a4f;
+        }
+
+        .milestone-description {
+            font-size: 0.8em;
+            color: #666;
+            margin: 4px 0;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -304,6 +376,11 @@
     <div id="claims-queue">
         <h2>🏥  Pending Claims</h2>
         <div id="active-claims"></div>
+    </div>
+
+    <div id="milestones" class="milestones-panel">
+        <h2>🎯 Company Goals</h2>
+        <div id="milestones-list"></div>
     </div>
 
     <!-- Add audio elements -->
