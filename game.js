@@ -132,6 +132,10 @@ class Game {
         
         // Update milestones display every second
         setInterval(() => this.checkMilestones(), 1000);
+
+        // Add title reference
+        this.titleElement = document.querySelector('h1');
+        this.currentTitle = "Small Insurance Business"; // Default title
     }
 
     generateAutomaticPolicies() {
@@ -371,6 +375,12 @@ class Game {
 
     completeMilestone(id, milestone) {
         this.completedMilestones.add(id);
+        
+        // Update company title with animation
+        this.currentTitle = milestone.name;
+        this.titleElement.textContent = this.currentTitle;
+        this.titleElement.classList.add('milestone-reached');
+        setTimeout(() => this.titleElement.classList.remove('milestone-reached'), 500);
         
         // Show achievement notification
         this.showEventMessage(`🎯 Milestone: ${milestone.name}! ${milestone.reward}`);
