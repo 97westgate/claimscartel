@@ -9,6 +9,10 @@ Here's how much money you make versus what the person you denied makes per year.
 
 # GAME MECHANICS
 
+Probability of claims should go up with the number of policies.
+
+As you delay processing something should go up.
+
 Events must be paused while modal is open. - this seems to not work when several modals are "queued up".
 
 Clicking it should be more satisfying and/or not possible after a while?

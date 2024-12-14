@@ -19,16 +19,6 @@ class Game {
                 emoji: "👨‍💼",
                 policiesPerSecond: 0.1,
                 visibleAtPolicies: 5  // Show after 5 policies
-            },
-            provider: {
-                cost: 500,
-                multiplier: 1.5,
-                count: 0,
-                baseCost: 500,
-                name: "Partner with Provider",
-                emoji: "👨‍⚕️",
-                visibleAtPolicies: 10,  // Show after 10 policies
-                claimReduction: 0.1  // Each provider reduces claim frequency by 10%
             }
         };
 
@@ -42,15 +32,27 @@ class Game {
         this.policiesPerSecDisplay.id = 'policies-per-sec';
         document.querySelector('.stats').appendChild(this.revenueDisplay);
         document.querySelector('.stats').appendChild(this.policiesPerSecDisplay);
-        this.upgradesContainer = document.createElement('div');
-        this.upgradesContainer.id = 'upgrades';
-        document.body.appendChild(this.upgradesContainer);
 
         // Remove both audio elements reference since we'll create them dynamically
         this.clickSoundTemplate = document.getElementById('clickSound');
         this.upgradeSoundTemplate = document.getElementById('upgradeSound');
         this.clickSoundTemplate.remove();
         this.upgradeSoundTemplate.remove();
+
+        // Get static elements
+        this.employeeButton = document.getElementById('employee-button');
+        this.employeeCost = document.getElementById('employee-cost');
+        this.employeeCount = document.getElementById('employee-count');
+
+        // Hide upgrades initially
+        document.querySelectorAll('.upgrade-item').forEach(item => item.style.display = 'none');
+
+        // Add click handlers
+        this.employeeButton.addEventListener('click', () => {
+            if (!this.isPaused) {
+                this.purchaseUpgrade('employee');
+            }
+        });
 
         // Bind click handler
         this.clickable.addEventListener('click', () => this.handleClick());
@@ -70,31 +72,6 @@ class Game {
             if (!this.isPaused) this.updatePoliciesPerSecond();
         }, 1000);
 
-        // Get static elements
-        this.employeeButton = document.getElementById('employee-button');
-        this.employeeCost = document.getElementById('employee-cost');
-        this.employeeCount = document.getElementById('employee-count');
-        
-        this.providerButton = document.getElementById('provider-button');
-        this.providerCost = document.getElementById('provider-cost');
-        this.providerCount = document.getElementById('provider-count');
-
-        // Hide upgrades initially
-        document.querySelectorAll('.upgrade-item').forEach(item => item.style.display = 'none');
-
-        // Add click handlers
-        this.employeeButton.addEventListener('click', () => {
-            if (!this.isPaused) {
-                this.purchaseUpgrade('employee');
-            }
-        });
-
-        this.providerButton.addEventListener('click', () => {
-            if (!this.isPaused) {
-                this.purchaseUpgrade('provider');
-            }
-        });
-
         // Update display
         this.updateDisplay();
 
@@ -108,26 +85,27 @@ class Game {
 
         this.isPaused = false;
 
-        // Preload sounds with different pitches and speeds
+        // Initialize claims manager
+        this.claimsManager = new ClaimsManager(this);
+
+        // Preload sounds
         this.upgradeSounds = [
-            { sound: new Audio('hi.mp3'), rate: 0.5, volume: 0.4 },   // Super slow & deep
+            { sound: new Audio('hi.mp3'), rate: 0.5, volume: 0.4 },
             { sound: new Audio('hi.mp3'), rate: 0.6, volume: 0.35 },
             { sound: new Audio('hi.mp3'), rate: 0.75, volume: 0.3 },
             { sound: new Audio('hi.mp3'), rate: 0.9, volume: 0.3 },
-            { sound: new Audio('hi.mp3'), rate: 1.0, volume: 0.3 },   // Normal
+            { sound: new Audio('hi.mp3'), rate: 1.0, volume: 0.3 },
             { sound: new Audio('hi.mp3'), rate: 1.2, volume: 0.25 },
             { sound: new Audio('hi.mp3'), rate: 1.4, volume: 0.25 },
             { sound: new Audio('hi.mp3'), rate: 1.6, volume: 0.2 },
             { sound: new Audio('hi.mp3'), rate: 1.8, volume: 0.15 },
-            { sound: new Audio('hi.mp3'), rate: 2.0, volume: 0.15 }   // Super fast & high
+            { sound: new Audio('hi.mp3'), rate: 2.0, volume: 0.15 }
         ];
-        // Set both playback rate and volume for each sound
         this.upgradeSounds.forEach(s => {
             s.sound.playbackRate = s.rate;
             s.sound.volume = s.volume;
         });
 
-        // Preload click sounds with slight variations
         this.clickSounds = [
             { sound: new Audio('click.mp3'), rate: 0.9, volume: 0.2 },
             { sound: new Audio('click.mp3'), rate: 1.0, volume: 0.2 },
@@ -148,7 +126,6 @@ class Game {
     }
 
     collectPremiums() {
-        // Collect premiums from all policies once per second
         const premiumsCollected = this.policies * (this.premiumRate / 1);
         this.money += premiumsCollected;
         this.updateDisplay();
@@ -178,7 +155,6 @@ class Game {
             this.policyValue *= upgrade.multiplier;
             upgrade.count++;
             
-            // Play random pitched sound
             const sound = this.upgradeSounds[Math.floor(Math.random() * this.upgradeSounds.length)];
             sound.sound.volume = 0.3;
             sound.sound.currentTime = 0;
@@ -219,20 +195,6 @@ class Game {
                 this.employeeCount.textContent += ` (${(employee.count * employee.policiesPerSecond).toFixed(1)} policies/sec)`;
             }
         }
-
-        // Update provider upgrade
-        const provider = this.upgrades.provider;
-        const providerDiv = document.querySelector('.upgrade-item:nth-child(2)');
-        providerDiv.style.display = this.policies >= provider.visibleAtPolicies ? 'grid' : 'none';
-            
-        if (this.policies >= provider.visibleAtPolicies) {
-            this.providerButton.disabled = this.money < provider.cost;
-            this.providerCost.textContent = `$${provider.cost.toLocaleString()}`;
-            this.providerCount.textContent = provider.emoji.repeat(provider.count);
-            if (provider.count > 0) {
-                this.providerCount.textContent += ` (${(provider.count * provider.claimReduction * 100).toFixed(0)}% less claims)`;
-            }
-        }
     }
 
     showEventMessage(message) {
@@ -241,7 +203,6 @@ class Game {
         eventDiv.textContent = message;
         document.body.appendChild(eventDiv);
 
-        // Remove after animation
         setTimeout(() => {
             eventDiv.classList.add('fade-out');
             setTimeout(() => eventDiv.remove(), 500);
@@ -259,10 +220,10 @@ class Game {
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 
-            oscillator.type = 'square';  // More harsh sound
-            oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-            oscillator.frequency.setValueAtTime(440, audioContext.currentTime + 0.1); // A4
-            oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2); // A5
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2);
 
             gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
@@ -273,7 +234,6 @@ class Game {
             oscillator.start();
             oscillator.stop(audioContext.currentTime + 0.3);
         } else {
-            // Regular popup sound for other events
             const popupSound = new Audio('popup.mp3');
             popupSound.volume = 0.2;
             popupSound.play();
@@ -295,10 +255,9 @@ class Game {
             const button = document.createElement('button');
             button.textContent = choice.text;
             button.onclick = () => {
-                // Play choice sound with different settings
                 const choiceSound = new Audio('popup.mp3');
-                choiceSound.volume = 0.1;  // Lower volume for choice
-                choiceSound.playbackRate = 1.2;  // Slightly faster for snappier feedback
+                choiceSound.volume = 0.1;
+                choiceSound.playbackRate = 1.2;
                 choiceSound.play();
 
                 choice.effect(this);
@@ -312,7 +271,6 @@ class Game {
     }
 
     triggerRandomEvent() {
-        // Don't trigger new events if game is paused (modal is open)
         if (this.isPaused) return;
 
         const availableEvents = this.events.filter(event => 
@@ -323,17 +281,15 @@ class Game {
             const event = availableEvents[Math.floor(Math.random() * availableEvents.length)];
             
             if (event.choices) {
-                // Show modal for choice-based events
                 this.showEventModal(event);
             } else {
-                // Create notification sound using Web Audio API
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
 
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-                oscillator.frequency.setValueAtTime(1108.73, audioContext.currentTime + 0.1); // C#6
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(1108.73, audioContext.currentTime + 0.1);
 
                 gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
@@ -344,7 +300,6 @@ class Game {
                 oscillator.start();
                 oscillator.stop(audioContext.currentTime + 0.3);
                 
-                // Directly trigger effect for notification events
                 event.effect(this);
             }
         }
