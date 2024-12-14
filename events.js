@@ -45,6 +45,33 @@ const GAME_EVENTS = [
                 }
             }
         ]
+    },
+    {
+        name: "Market Fluctuation",
+        emoji: "📈",
+        minPolicies: 5,
+        effect: function(game) {
+            game.premiumRate *= 1.1;
+            game.showEventMessage("Market rates increased! Premium rate up 10% 📈");
+        }
+    },
+    {
+        name: "Happy Customers",
+        emoji: "😊",
+        minPolicies: 3,
+        effect: function(game) {
+            game.money += 500;
+            game.showEventMessage("Customer satisfaction bonus received! +$500 😊");
+        }
+    },
+    {
+        name: "Efficient Processing",
+        emoji: "⚡",
+        minPolicies: 8,
+        effect: function(game) {
+            game.money += game.policies * 10;
+            game.showEventMessage("Claims processed efficiently! Bonus based on policies ⚡");
+        }
     }
 ];
 

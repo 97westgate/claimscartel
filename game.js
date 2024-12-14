@@ -220,7 +220,14 @@ class Game {
         
         if (availableEvents.length > 0) {
             const event = availableEvents[Math.floor(Math.random() * availableEvents.length)];
-            this.showEventModal(event);
+            
+            if (event.choices) {
+                // Show modal for choice-based events
+                this.showEventModal(event);
+            } else {
+                // Directly trigger effect for notification events
+                event.effect(this);
+            }
         }
     }
 }
