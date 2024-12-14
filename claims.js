@@ -12,23 +12,42 @@ class ClaimsManager {
     constructor(game) {
         this.game = game;
         this.activeClaims = new Map();
-        this.claimProbability = 0.3; // Increased to 30% chance per check
+        this.claimProbability = 0.3; // 30% chance per check
+        this.isClaimsSystemActive = false; // Start inactive
         
-        // Check for new claims every 10 seconds
-        setInterval(() => this.checkForNewClaims(), 10000);
+        // Check for claims system activation every second
+        setInterval(() => this.checkClaimsSystemActivation(), 1000);
         
         // Process existing claims every second
         setInterval(() => this.processClaims(), 1000);
         
         // Add reference to claims container
         this.claimsContainer = document.getElementById('active-claims');
+        this.claimsQueue = document.getElementById('claims-queue');
+        
+        // Hide claims queue initially
+        this.claimsQueue.style.display = 'none';
         
         // Update display every second
         setInterval(() => this.updateClaimTimers(), 1000);
     }
 
+    checkClaimsSystemActivation() {
+        const hasEnoughPolicies = this.game.policies >= 10;
+        const hasEmployee = this.game.upgrades.employee.count >= 5;
+        
+        if (hasEnoughPolicies && hasEmployee && !this.isClaimsSystemActive) {
+            this.isClaimsSystemActive = true;
+            this.claimsQueue.style.display = 'block';
+            this.game.showEventMessage("🏥 Your company is growing, and clients are starting to file claims for covered services.");
+            
+            // Start checking for new claims
+            this.claimsCheckInterval = setInterval(() => this.checkForNewClaims(), 10000);
+        }
+    }
+
     checkForNewClaims() {
-        if (this.game.isPaused) return;
+        if (this.game.isPaused || !this.isClaimsSystemActive) return;
         
         const randomCheck = Math.random();
         console.log('Checking for new claims:', {
@@ -38,15 +57,12 @@ class ClaimsManager {
             willGenerateClaim: randomCheck < this.claimProbability
         });
         
-        // Generate claims based on number of policies
-        if (randomCheck < this.claimProbability && this.game.policies >= 5) {
+        if (randomCheck < this.claimProbability) {
             const baseAmount = Math.floor(Math.random() * 1000) + 500;
             const claim = new Claim(baseAmount);
             this.activeClaims.set(claim.id, claim);
             
             console.log('New claim generated:', claim);
-            
-            // Show notification instead of modal
             this.game.showEventMessage(`New claim received: $${claim.amount} 📋`);
         }
     }
@@ -59,7 +75,7 @@ class ClaimsManager {
         // Show claim event modal
         const claimEvent = {
             name: "Insurance Claim",
-            emoji: "📋",
+            emoji: "🏥",
             description: `Claim amount: $${claim.amount}`,
             choices: [
                 {
