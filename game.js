@@ -78,56 +78,8 @@ class Game {
         // Update display
         this.updateDisplay();
 
-        // Replace events array with imported events
-        this.events = [
-            {
-                name: "Federal Grant Opportunity",
-                emoji: "💰",
-                description: "The government offers a grant for new HMOs. Do you apply?",
-                minPolicies: 10,
-                choices: [
-                    { 
-                        text: "Accept Grant", 
-                        effect: () => {
-                            this.money += 5000;
-                            this.showEventMessage("Accepted $5,000 grant! 💰");
-                        }
-                    },
-                    { 
-                        text: "Decline", 
-                        effect: () => {
-                            this.showEventMessage("Declined grant. Reputation intact! ✨");
-                        }
-                    }
-                ]
-            },
-            {
-                name: "Provider Strike",
-                emoji: "⚕️",
-                description: "Healthcare providers threaten to strike over low payouts!",
-                minPolicies: 20,
-                choices: [
-                    { 
-                        text: "Raise Payouts ($1,000)", 
-                        effect: () => {
-                            this.money -= 1000;
-                            this.showEventMessage("Paid providers $1,000 to prevent strike 🤝");
-                        }
-                    },
-                    { 
-                        text: "Negotiate", 
-                        effect: () => {
-                            if (Math.random() < 0.5) {
-                                this.premiumRate *= 0.9;
-                                this.showEventMessage("Negotiation failed! Premium rate reduced 10% 📉");
-                            } else {
-                                this.showEventMessage("Successfully negotiated! Crisis averted 🎉");
-                            }
-                        }
-                    }
-                ]
-            }
-        ];
+        // Use the global events array
+        this.events = window.GAME_EVENTS;
 
         // Start random events after a delay
         setTimeout(() => {
