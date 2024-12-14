@@ -186,6 +186,11 @@ class Game {
         const modal = document.createElement('div');
         modal.className = 'event-modal';
         
+        // Play popup sound
+        const popupSound = new Audio('popup.mp3');
+        popupSound.volume = 0.2;
+        popupSound.play();
+        
         // Pause the game when showing modal
         this.isPaused = true;
         
