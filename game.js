@@ -19,6 +19,16 @@ class Game {
                 emoji: "👨‍💼",
                 policiesPerSecond: 0.1,
                 visibleAtPolicies: 5  // Show after 5 policies
+            },
+            provider: {
+                cost: 500,
+                multiplier: 1.5,
+                count: 0,
+                baseCost: 500,
+                name: "Partner with Provider",
+                emoji: "👨‍⚕️",
+                visibleAtPolicies: 10,  // Show after 10 policies
+                claimReduction: 0.1  // Each provider reduces claim frequency by 10%
             }
         };
 
@@ -65,13 +75,23 @@ class Game {
         this.employeeCost = document.getElementById('employee-cost');
         this.employeeCount = document.getElementById('employee-count');
         
-        // Hide employee upgrade initially
-        document.querySelector('.upgrade-item').style.display = 'none';
+        this.providerButton = document.getElementById('provider-button');
+        this.providerCost = document.getElementById('provider-cost');
+        this.providerCount = document.getElementById('provider-count');
 
-        // Add click handler to employee button
+        // Hide upgrades initially
+        document.querySelectorAll('.upgrade-item').forEach(item => item.style.display = 'none');
+
+        // Add click handlers
         this.employeeButton.addEventListener('click', () => {
             if (!this.isPaused) {
                 this.purchaseUpgrade('employee');
+            }
+        });
+
+        this.providerButton.addEventListener('click', () => {
+            if (!this.isPaused) {
+                this.purchaseUpgrade('provider');
             }
         });
 
@@ -188,8 +208,8 @@ class Game {
 
         // Update employee upgrade
         const employee = this.upgrades.employee;
-        document.querySelector('.upgrade-item').style.display = 
-            this.policies >= employee.visibleAtPolicies ? 'grid' : 'none';
+        const employeeDiv = document.querySelector('.upgrade-item:nth-child(1)');
+        employeeDiv.style.display = this.policies >= employee.visibleAtPolicies ? 'grid' : 'none';
             
         if (this.policies >= employee.visibleAtPolicies) {
             this.employeeButton.disabled = this.money < employee.cost;
@@ -197,6 +217,20 @@ class Game {
             this.employeeCount.textContent = employee.emoji.repeat(employee.count);
             if (employee.count > 0) {
                 this.employeeCount.textContent += ` (${(employee.count * employee.policiesPerSecond).toFixed(1)} policies/sec)`;
+            }
+        }
+
+        // Update provider upgrade
+        const provider = this.upgrades.provider;
+        const providerDiv = document.querySelector('.upgrade-item:nth-child(2)');
+        providerDiv.style.display = this.policies >= provider.visibleAtPolicies ? 'grid' : 'none';
+            
+        if (this.policies >= provider.visibleAtPolicies) {
+            this.providerButton.disabled = this.money < provider.cost;
+            this.providerCost.textContent = `$${provider.cost.toLocaleString()}`;
+            this.providerCount.textContent = provider.emoji.repeat(provider.count);
+            if (provider.count > 0) {
+                this.providerCount.textContent += ` (${(provider.count * provider.claimReduction * 100).toFixed(0)}% less claims)`;
             }
         }
     }
