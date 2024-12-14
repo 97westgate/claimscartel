@@ -87,6 +87,25 @@ class Game {
         }, 15000);
 
         this.isPaused = false;
+
+        // Preload sounds with different pitches and speeds
+        this.upgradeSounds = [
+            { sound: new Audio('hi.mp3'), rate: 0.5, volume: 0.4 },   // Super slow & deep
+            { sound: new Audio('hi.mp3'), rate: 0.6, volume: 0.35 },
+            { sound: new Audio('hi.mp3'), rate: 0.75, volume: 0.3 },
+            { sound: new Audio('hi.mp3'), rate: 0.9, volume: 0.3 },
+            { sound: new Audio('hi.mp3'), rate: 1.0, volume: 0.3 },   // Normal
+            { sound: new Audio('hi.mp3'), rate: 1.2, volume: 0.25 },
+            { sound: new Audio('hi.mp3'), rate: 1.4, volume: 0.25 },
+            { sound: new Audio('hi.mp3'), rate: 1.6, volume: 0.2 },
+            { sound: new Audio('hi.mp3'), rate: 1.8, volume: 0.15 },
+            { sound: new Audio('hi.mp3'), rate: 2.0, volume: 0.15 }   // Super fast & high
+        ];
+        // Set both playback rate and volume for each sound
+        this.upgradeSounds.forEach(s => {
+            s.sound.playbackRate = s.rate;
+            s.sound.volume = s.volume;
+        });
     }
 
     generateAutomaticPolicies() {
@@ -127,11 +146,12 @@ class Game {
             this.policyValue *= upgrade.multiplier;
             upgrade.count++;
             
-            const upgradeSound = new Audio('hi.mp3');
-            upgradeSound.volume = 0.3;
-            upgradeSound.play();
+            // Play random pitched sound
+            const sound = this.upgradeSounds[Math.floor(Math.random() * this.upgradeSounds.length)];
+            sound.sound.volume = 0.3;
+            sound.sound.currentTime = 0;
+            sound.sound.play();
 
-            // Get button by ID, just like clipboard
             const button = document.getElementById('employee-button');
             button.classList.add('clicked');
             setTimeout(() => button.classList.remove('clicked'), 150);

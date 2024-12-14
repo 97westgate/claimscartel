@@ -10,6 +10,8 @@ There needs to be more randomness, random events.
 
 Events need to be per "phase".
 
+Ability to fire people?
+
 # VISUALS
 
 Maybe when the employees become many, they need to change into many people emojis.
