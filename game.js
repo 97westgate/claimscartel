@@ -67,6 +67,35 @@ class Game {
 
         // Update display
         this.updateDisplay();
+
+        this.randomEvents = [
+            { 
+                name: "Flu Season", 
+                emoji: "🤒",
+                effect: () => { 
+                    this.premiumRate *= 1.5; 
+                    setTimeout(() => {
+                        this.premiumRate /= 1.5;
+                        this.showEventMessage("Flu season is over!");
+                    }, 10000);
+                    this.showEventMessage("Flu Season! Premium rates increased by 50%!");
+                }
+            },
+            { 
+                name: "Insurance Fraud", 
+                emoji: "🚨",
+                effect: () => { 
+                    const loss = Math.floor(this.money * 0.1); // Lose 10% of current money
+                    this.money -= loss;
+                    this.showEventMessage(`Fraud detected! Lost $${loss.toLocaleString()}`);
+                }
+            }
+        ];
+
+        // Start random events after a delay
+        setTimeout(() => {
+            setInterval(() => this.triggerRandomEvent(), 30000); // Every 30 seconds
+        }, 15000); // Start after 15 seconds
     }
 
     generateAutomaticPolicies() {
@@ -143,6 +172,25 @@ class Game {
                 this.employeeCount.textContent += ` (${(employee.count * employee.policiesPerSecond).toFixed(1)} policies/sec)`;
             }
         }
+    }
+
+    showEventMessage(message) {
+        const eventDiv = document.createElement('div');
+        eventDiv.className = 'event-message';
+        eventDiv.textContent = message;
+        document.body.appendChild(eventDiv);
+
+        // Remove after animation
+        setTimeout(() => {
+            eventDiv.classList.add('fade-out');
+            setTimeout(() => eventDiv.remove(), 500);
+        }, 4000);
+    }
+
+    triggerRandomEvent() {
+        if (this.policies < 10) return; // Only trigger events after 10 policies
+        const event = this.randomEvents[Math.floor(Math.random() * this.randomEvents.length)];
+        event.effect();
     }
 }
 
