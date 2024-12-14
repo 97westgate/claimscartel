@@ -134,10 +134,12 @@ class ClaimsManager {
             this.game.showEventMessage(`Claim paid: -$${claim.amount} 💰`);
         } else if (status === "denied") {
             this.game.showEventMessage(`Claim denied! Saved $${claim.amount} ❌`);
+            // Reduce public opinion on first denial
+            this.game.updatePublicOpinion(-10);
         }
         
         this.activeClaims.delete(claimId);
-        this.updateClaimTimers(); // Update display immediately
+        this.updateClaimTimers();
     }
 
     delayClaim(claimId) {

@@ -9,6 +9,10 @@ Here's how much money you make versus what the person you denied makes per year.
 
 # GAME MECHANICS
 
+Claims as a popup or as a pending in queue should be different.
+
+More news events like flu, covid, etc.
+
 Probability of claims should go up with the number of policies.
 
 As you delay processing something should go up.

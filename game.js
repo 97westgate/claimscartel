@@ -26,12 +26,11 @@ class Game {
         this.clickable = document.getElementById('clickable');
         this.policiesDisplay = document.getElementById('policies');
         this.moneyDisplay = document.getElementById('money');
-        this.revenueDisplay = document.createElement('div');
-        this.revenueDisplay.id = 'revenue';
-        this.policiesPerSecDisplay = document.createElement('div');
-        this.policiesPerSecDisplay.id = 'policies-per-sec';
-        document.querySelector('.stats').appendChild(this.revenueDisplay);
-        document.querySelector('.stats').appendChild(this.policiesPerSecDisplay);
+        this.revenueDisplay = document.getElementById('revenue');
+        this.policiesPerSecDisplay = document.getElementById('policies-per-sec');
+        this.publicOpinionDisplay = document.getElementById('public-opinion');
+        this.opinionValueDisplay = document.getElementById('opinion-value');
+        this.opinionTrendDisplay = document.getElementById('opinion-trend');
 
         // Remove both audio elements reference since we'll create them dynamically
         this.clickSoundTemplate = document.getElementById('clickSound');
@@ -116,6 +115,12 @@ class Game {
             s.sound.playbackRate = s.rate;
             s.sound.volume = s.volume;
         });
+
+        this.publicOpinion = 50;
+        this.publicOpinionVisible = false;
+        this.publicOpinionDisplay = document.getElementById('public-opinion');
+        this.opinionValueDisplay = document.getElementById('opinion-value');
+        this.opinionTrendDisplay = document.getElementById('opinion-trend');
     }
 
     generateAutomaticPolicies() {
@@ -194,6 +199,20 @@ class Game {
             if (employee.count > 0) {
                 this.employeeCount.textContent += ` (${(employee.count * employee.policiesPerSecond).toFixed(1)} policies/sec)`;
             }
+        }
+
+        // Update public opinion display if visible
+        if (this.publicOpinionVisible) {
+            this.opinionValueDisplay.textContent = Math.round(this.publicOpinion);
+            
+            // Update trend emoji based on score
+            let trendEmoji = '😐';
+            if (this.publicOpinion >= 80) trendEmoji = '😄';
+            else if (this.publicOpinion >= 60) trendEmoji = '🙂';
+            else if (this.publicOpinion <= 20) trendEmoji = '😡';
+            else if (this.publicOpinion <= 40) trendEmoji = '😟';
+            
+            this.opinionTrendDisplay.textContent = trendEmoji;
         }
     }
 
@@ -303,6 +322,17 @@ class Game {
                 event.effect(this);
             }
         }
+    }
+
+    updatePublicOpinion(change) {
+        if (!this.publicOpinionVisible) {
+            this.publicOpinionVisible = true;
+            this.publicOpinionDisplay.style.display = 'block';
+            this.showEventMessage("📰 Public Opinion now affects your business!");
+        }
+
+        this.publicOpinion = Math.max(0, Math.min(100, this.publicOpinion + change));
+        this.updateDisplay();
     }
 }
 

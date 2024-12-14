@@ -203,6 +203,15 @@
             float: right;
             color: #666;
         }
+
+        #public-opinion {
+            color: #2a9d8f;
+            font-weight: bold;
+        }
+        
+        #opinion-trend {
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -211,6 +220,12 @@
     <div class="stats">
         <div>Policies: <span id="policies">0</span></div>
         <div>Money: $<span id="money">0</span></div>
+        <div id="revenue">Revenue: $0/sec</div>
+        <div id="policies-per-sec">Policies: 0/sec</div>
+        <div id="public-opinion" style="display: none">
+            Public Opinion: <span id="opinion-value">50</span>/100 
+            <span id="opinion-trend">😐</span>
+        </div>
     </div>
 
     <div id="clickable">📋</div>
