@@ -82,22 +82,21 @@ class ClaimsManager {
         const claim = this.activeClaims.get(claimId);
         if (!claim) return;
         
-        // Show claim event modal with type info
         const claimEvent = {
             name: claim.type.name,
             emoji: claim.type.icon,
             description: `Amount: $${claim.amount.toLocaleString()}\nType: ${claim.type.name}`,
             choices: [
                 {
-                    text: "Pay Claim",
+                    text: CLAIM_CHOICES.PAY,
                     effect: () => this.resolveClaim(claimId, "approved")
                 },
                 {
-                    text: "Deny Claim",
+                    text: CLAIM_CHOICES.DENY,
                     effect: () => this.resolveClaim(claimId, "denied")
                 },
                 {
-                    text: "Delay Processing",
+                    text: CLAIM_CHOICES.DELAY,
                     effect: () => this.delayClaim(claimId)
                 }
             ]

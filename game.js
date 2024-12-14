@@ -1,7 +1,11 @@
 class Game {
-    constructor() {
-        this.policies = 0;
-        this.money = 0;
+    constructor(initialState = 'NEW_GAME') {
+        // Get initial state configuration
+        const state = INITIAL_STATES[initialState];
+        
+        // Initialize with either provided state or defaults
+        this.policies = state.policies;
+        this.money = state.money;
         this.policyValue = 100;
         this.premiumRate = 10; // $ per policy per second
         this.manualPoliciesLastSecond = 0;
@@ -13,12 +17,12 @@ class Game {
             employee: { 
                 cost: 1000, 
                 multiplier: 2, 
-                count: 0,
+                count: state.employees,  // Use initial employees count
                 baseCost: 1000,
                 name: "Hire Employee",
                 emoji: "👨‍💼",
                 policiesPerSecond: 0.1,
-                visibleAtPolicies: 5  // Show after 5 policies
+                visibleAtPolicies: 5
             }
         };
 
@@ -338,5 +342,6 @@ class Game {
 
 // Start the game when the page loads
 window.onload = () => {
-    const game = new Game();
+    // You can now start with different initial states
+    const game = new Game('CLAIMS_START');  // or 'LATE_GAME', 'RICH', etc.
 };

@@ -9,6 +9,8 @@ Here's how much money you make versus what the person you denied makes per year.
 
 # GAME MECHANICS
 
+Every claim should have a heartfelt story.
+
 I don't have enough choice
 
 Claims as a popup or as a pending in queue should be different.

@@ -83,13 +83,13 @@ const CLAIMS_EVENTS = [
         minPolicies: 5,
         choices: [
             { 
-                text: "Deny Claim", 
+                text: CLAIM_CHOICES.DENY,
                 effect: function(game) {
                     game.showEventMessage("Claim denied. Saved $500 but reputation may suffer 🚫");
                 }
             },
             { 
-                text: "Depose Patient", 
+                text: CLAIM_CHOICES.DEPOSE_PATIENT,
                 effect: function(game) {
                     if (Math.random() < 0.7) {
                         game.showEventMessage("Found inconsistency in testimony! Claim invalidated 📝");
@@ -100,7 +100,7 @@ const CLAIMS_EVENTS = [
                 }
             },
             { 
-                text: "Delay Processing", 
+                text: CLAIM_CHOICES.DELAY,
                 effect: function(game) {
                     if (Math.random() < 0.5) {
                         game.showEventMessage("Patient gave up pursuing claim! 📨");
@@ -119,7 +119,7 @@ const CLAIMS_EVENTS = [
         minPolicies: 15,
         choices: [
             { 
-                text: "Deny (High Risk)", 
+                text: CLAIM_CHOICES.DENY_RISKY,
                 effect: function(game) {
                     if (Math.random() < 0.3) {
                         game.showEventMessage("Claim successfully denied! Saved $5,000 🎯");
@@ -130,7 +130,7 @@ const CLAIMS_EVENTS = [
                 }
             },
             { 
-                text: "Depose Medical Staff", 
+                text: CLAIM_CHOICES.DEPOSE_STAFF,
                 effect: function(game) {
                     if (Math.random() < 0.6) {
                         game.money -= 2000;
@@ -142,7 +142,7 @@ const CLAIMS_EVENTS = [
                 }
             },
             { 
-                text: "Delay with Paperwork", 
+                text: CLAIM_CHOICES.DELAY_PAPERWORK,
                 effect: function(game) {
                     game.money -= 5000;
                     game.showEventMessage("Eventually had to pay the full $5,000 plus bad PR 📋");
