@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coverage Cartel</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        #clickable, .emoji-button {
+            cursor: pointer;
+            background: none;
+            border: none;
+            transform: scale(1);
+            user-select: none;
+        }
+
+        #clickable {
+            font-size: 64px;
+            margin: 20px;
+        }
+
+        .emoji-button {
+            font-size: 32px;
+            padding: 5px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .clicked {
+            animation: clickAnimation 0.15s ease-in-out;
+        }
+
+        @keyframes clickAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.85); }
+            100% { transform: scale(1.1); }
+        }
+
+        .stats {
+            font-size: 24px;
+            margin: 10px;
+        }
+
+        #upgrades {
+            margin-top: 20px;
+        }
+
+        #upgrades .upgrade-item {
+            margin: 10px;
+            display: grid;
+            grid-template-columns: 250px 60px 200px;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #upgrades .upgrade-label {
+            font-size: 16px;
+        }
+
+        #employee-count {
+            min-width: 200px;
+        }
+
+        #upgrades button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #revenue, #policies-per-sec {
+            color: #2a9d8f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Coverage Cartel</h1>
+    
+    <div class="stats">
+        <div>Policies: <span id="policies">0</span></div>
+        <div>Money: $<span id="money">0</span></div>
+    </div>
+
+    <div id="clickable">📋</div>
+
+    <div id="upgrades">
+        <div class="upgrade-item">
+            <span class="upgrade-label">Hire Employee (<span id="employee-cost">$1,000</span>)</span>
+            <button id="employee-button" class="emoji-button">👨‍💼</button>
+            <span id="employee-count">Owned: 0</span>
+        </div>
+    </div>
+
+    <!-- Add audio elements -->
+    <audio id="clickSound" preload="auto">
+        <source src="click.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="upgradeSound" preload="auto">
+        <source src="hi.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="game.js"></script>
+</body>
+</html>
