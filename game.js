@@ -46,13 +46,19 @@ class Game {
         this.clickable.addEventListener('click', () => this.handleClick());
 
         // Start automatic policy generation
-        setInterval(() => this.generateAutomaticPolicies(), 100);
+        setInterval(() => {
+            if (!this.isPaused) this.generateAutomaticPolicies();
+        }, 100);
         
         // Start premium collection
-        setInterval(() => this.collectPremiums(), 1000);
+        setInterval(() => {
+            if (!this.isPaused) this.collectPremiums();
+        }, 1000);
 
         // Update policies per second counter every second
-        setInterval(() => this.updatePoliciesPerSecond(), 1000);
+        setInterval(() => {
+            if (!this.isPaused) this.updatePoliciesPerSecond();
+        }, 1000);
 
         // Get static elements
         this.employeeButton = document.getElementById('employee-button');
@@ -63,39 +69,72 @@ class Game {
         document.querySelector('.upgrade-item').style.display = 'none';
 
         // Add click handler to employee button
-        this.employeeButton.addEventListener('click', () => this.purchaseUpgrade('employee'));
+        this.employeeButton.addEventListener('click', () => {
+            if (!this.isPaused) {
+                this.purchaseUpgrade('employee');
+            }
+        });
 
         // Update display
         this.updateDisplay();
 
-        this.randomEvents = [
-            { 
-                name: "Flu Season", 
-                emoji: "🤒",
-                effect: () => { 
-                    this.premiumRate *= 1.5; 
-                    setTimeout(() => {
-                        this.premiumRate /= 1.5;
-                        this.showEventMessage("Flu season is over!");
-                    }, 10000);
-                    this.showEventMessage("Flu Season! Premium rates increased by 50%!");
-                }
+        // Replace events array with imported events
+        this.events = [
+            {
+                name: "Federal Grant Opportunity",
+                emoji: "💰",
+                description: "The government offers a grant for new HMOs. Do you apply?",
+                minPolicies: 10,
+                choices: [
+                    { 
+                        text: "Accept Grant", 
+                        effect: () => {
+                            this.money += 5000;
+                            this.showEventMessage("Accepted $5,000 grant! 💰");
+                        }
+                    },
+                    { 
+                        text: "Decline", 
+                        effect: () => {
+                            this.showEventMessage("Declined grant. Reputation intact! ✨");
+                        }
+                    }
+                ]
             },
-            { 
-                name: "Insurance Fraud", 
-                emoji: "🚨",
-                effect: () => { 
-                    const loss = Math.floor(this.money * 0.1); // Lose 10% of current money
-                    this.money -= loss;
-                    this.showEventMessage(`Fraud detected! Lost $${loss.toLocaleString()}`);
-                }
+            {
+                name: "Provider Strike",
+                emoji: "⚕️",
+                description: "Healthcare providers threaten to strike over low payouts!",
+                minPolicies: 20,
+                choices: [
+                    { 
+                        text: "Raise Payouts ($1,000)", 
+                        effect: () => {
+                            this.money -= 1000;
+                            this.showEventMessage("Paid providers $1,000 to prevent strike 🤝");
+                        }
+                    },
+                    { 
+                        text: "Negotiate", 
+                        effect: () => {
+                            if (Math.random() < 0.5) {
+                                this.premiumRate *= 0.9;
+                                this.showEventMessage("Negotiation failed! Premium rate reduced 10% 📉");
+                            } else {
+                                this.showEventMessage("Successfully negotiated! Crisis averted 🎉");
+                            }
+                        }
+                    }
+                ]
             }
         ];
 
         // Start random events after a delay
         setTimeout(() => {
-            setInterval(() => this.triggerRandomEvent(), 30000); // Every 30 seconds
-        }, 15000); // Start after 15 seconds
+            setInterval(() => this.triggerRandomEvent(), 30000);
+        }, 15000);
+
+        this.isPaused = false;
     }
 
     generateAutomaticPolicies() {
@@ -113,6 +152,8 @@ class Game {
     }
 
     handleClick() {
+        if (this.isPaused) return;
+        
         this.policies++;
         
         const clickSound = new Audio('click.mp3');
@@ -126,6 +167,8 @@ class Game {
     }
 
     purchaseUpgrade(upgradeKey) {
+        if (this.isPaused) return;
+        
         const upgrade = this.upgrades[upgradeKey];
         if (this.money >= upgrade.cost) {
             this.money -= upgrade.cost;
@@ -161,12 +204,12 @@ class Game {
 
         // Update employee upgrade
         const employee = this.upgrades.employee;
+        document.querySelector('.upgrade-item').style.display = 
+            this.policies >= employee.visibleAtPolicies ? 'grid' : 'none';
+            
         if (this.policies >= employee.visibleAtPolicies) {
-            document.querySelector('.upgrade-item').style.display = 'flex';
             this.employeeButton.disabled = this.money < employee.cost;
             this.employeeCost.textContent = `$${employee.cost.toLocaleString()}`;
-            
-            // Show emojis instead of number
             this.employeeCount.textContent = employee.emoji.repeat(employee.count);
             if (employee.count > 0) {
                 this.employeeCount.textContent += ` (${(employee.count * employee.policiesPerSecond).toFixed(1)} policies/sec)`;
@@ -187,10 +230,46 @@ class Game {
         }, 4000);
     }
 
+    showEventModal(event) {
+        const modal = document.createElement('div');
+        modal.className = 'event-modal';
+        
+        // Pause the game when showing modal
+        this.isPaused = true;
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>${event.emoji} ${event.name}</h2>
+                <p>${event.description}</p>
+                <div class="modal-buttons"></div>
+            </div>
+        `;
+
+        const buttonContainer = modal.querySelector('.modal-buttons');
+        
+        event.choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.textContent = choice.text;
+            button.onclick = () => {
+                choice.effect(this);
+                document.body.removeChild(modal);
+                this.isPaused = false;
+            };
+            buttonContainer.appendChild(button);
+        });
+
+        document.body.appendChild(modal);
+    }
+
     triggerRandomEvent() {
-        if (this.policies < 10) return; // Only trigger events after 10 policies
-        const event = this.randomEvents[Math.floor(Math.random() * this.randomEvents.length)];
-        event.effect();
+        const availableEvents = this.events.filter(event => 
+            this.policies >= (event.minPolicies || 0)
+        );
+        
+        if (availableEvents.length > 0) {
+            const event = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+            this.showEventModal(event);
+        }
     }
 }
 

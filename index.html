@@ -104,6 +104,53 @@
             from { opacity: 1; }
             to { opacity: 0; }
         }
+
+        .event-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #2a9d8f;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #2a9d8f;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-buttons button:hover {
+            background: #238579;
+        }
     </style>
 </head>
 <body>
@@ -132,6 +179,7 @@
         <source src="hi.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- Change back to regular script -->
     <script src="game.js"></script>
 </body>
 </html>
