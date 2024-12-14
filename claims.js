@@ -5,8 +5,24 @@ class Claim {
         this.timeLimit = timeLimit;
         this.status = "pending";
         this.createdAt = Date.now();
-        // Add claim types with different characteristics
+        
         this.type = this.generateClaimType();
+        
+        // Legitimacy now influenced by claim type
+        const baseChance = Math.random();
+        const typeModifier = {
+            "Routine Checkup": 0.2,  // Usually legitimate
+            "Emergency": -0.3,       // Often has inconsistencies due to rush
+            "Prescription": 0.1,     // Generally legitimate
+            "Surgery": -0.2         // Complex, harder to verify
+        }[this.type.name];
+        
+        this.legitimacy = Math.min(1, Math.max(0, baseChance + typeModifier));
+        this.investigationLevel = 0;
+        this.investigationCost = Math.round(amount * 0.1);
+        
+        // Generate specific details about the claim
+        this.details = this.generateDetails();
     }
 
     generateClaimType() {
@@ -17,6 +33,62 @@ class Claim {
             { name: "Surgery", multiplier: 3.0, icon: "🔪" }
         ];
         return types[Math.floor(Math.random() * types.length)];
+    }
+
+    generateDetails() {
+        const isLegit = this.legitimacy > 0.5;
+        
+        return {
+            documentation: {
+                dates: isLegit ? "All dates consistent" : "Multiple date discrepancies found",
+                signatures: isLegit ? "All signatures verified" : "Missing key signatures",
+                codes: isLegit ? "Correct billing codes" : "Unusual billing code pattern"
+            },
+            medical: {
+                history: isLegit ? "Consistent with patient record" : "Conflicts with previous records",
+                symptoms: isLegit ? "Well documented symptoms" : "Vague symptom description",
+                treatment: isLegit ? "Standard treatment protocol" : "Unusual treatment choice"
+            },
+            provider: {
+                history: isLegit ? "Clean claim history" : "Previous fraudulent claims",
+                license: isLegit ? "Current medical license" : "License renewal pending",
+                specialization: isLegit ? "Specialist in treatment area" : "Outside normal practice area"
+            }
+        };
+    }
+
+    // Returns details based on investigation level
+    getVisibleDetails() {
+        const categories = ['documentation', 'medical', 'provider'];
+        const visible = {};
+        
+        for (let i = 0; i < this.investigationLevel; i++) {
+            if (categories[i]) {
+                visible[categories[i]] = this.details[categories[i]];
+            }
+        }
+        
+        return visible;
+    }
+
+    // Calculate confidence score based on visible details
+    getConfidenceScore() {
+        const details = this.getVisibleDetails();
+        let legitimateCount = 0;
+        let totalChecks = 0;
+        
+        Object.values(details).forEach(category => {
+            Object.values(category).forEach(detail => {
+                totalChecks++;
+                if (!detail.includes("Missing") && 
+                    !detail.includes("Unusual") && 
+                    !detail.includes("Conflicts")) {
+                    legitimateCount++;
+                }
+            });
+        });
+        
+        return totalChecks ? (legitimateCount / totalChecks) : 0;
     }
 }
 
@@ -82,11 +154,39 @@ class ClaimsManager {
         const claim = this.activeClaims.get(claimId);
         if (!claim) return;
         
+        // Format visible details into HTML
+        const details = claim.getVisibleDetails();
+        let detailsHtml = '';
+        
+        for (const [category, items] of Object.entries(details)) {
+            detailsHtml += `<div class="claim-category">
+                <strong>${category.charAt(0).toUpperCase() + category.slice(1)}:</strong><br>`;
+            for (const [key, value] of Object.entries(items)) {
+                detailsHtml += `- ${value}<br>`;
+            }
+            detailsHtml += '</div>';
+        }
+        
+        const confidenceScore = claim.getConfidenceScore();
+        const confidenceEmoji = confidenceScore > 0.7 ? "✅" : 
+                               confidenceScore > 0.3 ? "⚠️" : "❌";
+        
         const claimEvent = {
             name: claim.type.name,
             emoji: claim.type.icon,
-            description: `Amount: $${claim.amount.toLocaleString()}\nType: ${claim.type.name}`,
+            description: `
+                Amount: $${claim.amount.toLocaleString()}<br>
+                Type: ${claim.type.name}<br>
+                ${detailsHtml}
+                ${claim.investigationLevel > 0 ? 
+                    `<br>Confidence: ${confidenceEmoji} ${Math.round(confidenceScore * 100)}%` : 
+                    ''}
+            `,
             choices: [
+                ...(claim.investigationLevel < 3 ? [{
+                    text: `🔍 Investigate ($${claim.investigationCost})`,
+                    effect: () => this.investigateClaim(claimId)
+                }] : []),
                 {
                     text: CLAIM_CHOICES.PAY,
                     effect: () => this.resolveClaim(claimId, "approved")
@@ -94,15 +194,20 @@ class ClaimsManager {
                 {
                     text: CLAIM_CHOICES.DENY,
                     effect: () => this.resolveClaim(claimId, "denied")
-                },
-                {
-                    text: CLAIM_CHOICES.DELAY,
-                    effect: () => this.delayClaim(claimId)
                 }
             ]
         };
         
         this.game.showEventModal(claimEvent);
+    }
+
+    investigateClaim(claimId) {
+        const claim = this.activeClaims.get(claimId);
+        if (!claim || claim.investigationLevel >= 3) return;
+        
+        this.game.money -= claim.investigationCost;
+        claim.investigationLevel++;
+        this.handleClaim(claimId); // Show modal again with new info
     }
 
     updateClaimTimers() {
@@ -135,6 +240,24 @@ class ClaimsManager {
     resolveClaim(claimId, status) {
         const claim = this.activeClaims.get(claimId);
         if (!claim) return;
+
+        if (status === "denied") {
+            if (claim.legitimacy > 0.7) {
+                // Denying a legitimate claim
+                const penalty = claim.amount * 2;
+                this.game.money -= penalty;
+                this.game.updatePublicOpinion(-20);
+                this.game.showEventMessage(`Lawsuit lost! Paid ${penalty} in damages! ⚖️`);
+            } else if (claim.legitimacy > 0.3) {
+                // Grey area claim
+                this.game.updatePublicOpinion(-5);
+                this.game.showEventMessage("Claim denied, but public trust affected 📉");
+            } else {
+                // Fraudulent claim caught
+                this.game.updatePublicOpinion(5);
+                this.game.showEventMessage("Fraudulent claim caught! Public trust increased 📈");
+            }
+        }
 
         // Add to history
         this.claimHistory.unshift({
