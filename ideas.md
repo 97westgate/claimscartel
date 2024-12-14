@@ -97,8 +97,12 @@ Cursor should only be used for the game logic. Populating events should be done 
 Deciding "when" to trigger upgrades should be done by a separate agent.
 
 
+# GOALS
 
-## Chris thoughts
+XYZ in revenue, profit, i.e. shareholder value, your own salary needs to be huge.
+
+
+## outside thoughts
 satisfying within the few seconds of playing, something kind of cool to hook me
 visual or game mechanic
 You want it to heighten.
