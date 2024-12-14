@@ -14,11 +14,17 @@ Events need to be per "phase".
 
 Ability to fire people?
 
+Ability to do "layoffs".
+
+Reaching certain thresholds should unlock new features.
+
 # VISUALS
 
 Maybe when the employees become many, they need to change into many people emojis.
 
 There should be some concept of time.
+
+Change the background as you get richer.
 
 
 # SOUNDS
@@ -44,4 +50,6 @@ Different music as you get richer.
 
 See how fast other people have gotten to the top across the globe, your country, amongst your friends.
 
-#
+# Development
+
+Cursor should only be used for the game logic. Populating events should be done by a separate agent.

@@ -75,5 +75,85 @@ const GAME_EVENTS = [
     }
 ];
 
+const CLAIMS_EVENTS = [
+    {
+        name: "Routine Checkup Claim",
+        emoji: "🏥",
+        description: "A policyholder filed a $500 claim for a routine checkup.",
+        minPolicies: 5,
+        choices: [
+            { 
+                text: "Deny Claim", 
+                effect: function(game) {
+                    game.showEventMessage("Claim denied. Saved $500 but reputation may suffer 🚫");
+                }
+            },
+            { 
+                text: "Depose Patient", 
+                effect: function(game) {
+                    if (Math.random() < 0.7) {
+                        game.showEventMessage("Found inconsistency in testimony! Claim invalidated 📝");
+                    } else {
+                        game.money -= 1000;
+                        game.showEventMessage("Deposition backfired. Paid $1,000 in legal fees 👎");
+                    }
+                }
+            },
+            { 
+                text: "Delay Processing", 
+                effect: function(game) {
+                    if (Math.random() < 0.5) {
+                        game.showEventMessage("Patient gave up pursuing claim! 📨");
+                    } else {
+                        game.money -= 500;
+                        game.showEventMessage("Had to pay claim with interest: $500 💸");
+                    }
+                }
+            }
+        ]
+    },
+    {
+        name: "Emergency Surgery Claim",
+        emoji: "🚑",
+        description: "Urgent $5,000 claim for emergency appendectomy.",
+        minPolicies: 15,
+        choices: [
+            { 
+                text: "Deny (High Risk)", 
+                effect: function(game) {
+                    if (Math.random() < 0.3) {
+                        game.showEventMessage("Claim successfully denied! Saved $5,000 🎯");
+                    } else {
+                        game.money -= 10000;
+                        game.showEventMessage("Lawsuit filed! Paid $10,000 in damages ⚖️");
+                    }
+                }
+            },
+            { 
+                text: "Depose Medical Staff", 
+                effect: function(game) {
+                    if (Math.random() < 0.6) {
+                        game.money -= 2000;
+                        game.showEventMessage("Found procedure wasn't entirely necessary. Settled for $2,000 📊");
+                    } else {
+                        game.money -= 7000;
+                        game.showEventMessage("Deposition supported claim. Paid $7,000 total 📉");
+                    }
+                }
+            },
+            { 
+                text: "Delay with Paperwork", 
+                effect: function(game) {
+                    game.money -= 5000;
+                    game.showEventMessage("Eventually had to pay the full $5,000 plus bad PR 📋");
+                }
+            }
+        ]
+    }
+];
+
+// Add claims events to the main events array
+GAME_EVENTS.push(...CLAIMS_EVENTS);
+
 // Add this to the window object so it's globally available
 window.GAME_EVENTS = GAME_EVENTS; 

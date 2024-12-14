@@ -218,10 +218,32 @@ class Game {
         const modal = document.createElement('div');
         modal.className = 'event-modal';
         
-        // Play popup sound
-        const popupSound = new Audio('popup.mp3');
-        popupSound.volume = 0.2;
-        popupSound.play();
+        // Different sounds for different event types
+        if (event.name.includes("Claim")) {
+            // Create urgent/alarm-like sound for claims
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'square';  // More harsh sound
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime + 0.1); // A4
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2); // A5
+
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } else {
+            // Regular popup sound for other events
+            const popupSound = new Audio('popup.mp3');
+            popupSound.volume = 0.2;
+            popupSound.play();
+        }
         
         this.isPaused = true;
         
@@ -256,6 +278,9 @@ class Game {
     }
 
     triggerRandomEvent() {
+        // Don't trigger new events if game is paused (modal is open)
+        if (this.isPaused) return;
+
         const availableEvents = this.events.filter(event => 
             this.policies >= (event.minPolicies || 0)
         );
