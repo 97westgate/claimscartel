@@ -9,6 +9,8 @@ Here's how much money you make versus what the person you denied makes per year.
 
 # GAME MECHANICS
 
+I don't have enough choice
+
 Claims as a popup or as a pending in queue should be different.
 
 More news events like flu, covid, etc.
@@ -59,6 +61,8 @@ Change the background as you get richer.
 
 
 # SOUNDS
+
+Sound when there is news?
 
 Every button must have a sound.
 

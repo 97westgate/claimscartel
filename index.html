@@ -170,7 +170,7 @@
         .claim-item {
             background: #f5f5f5;
             border-radius: 4px;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 8px;
             position: relative;
             cursor: pointer;
@@ -212,6 +212,18 @@
         #opinion-trend {
             font-size: 1.2em;
         }
+
+        .claim-type {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .claim-amount {
+            font-weight: bold;
+            color: #2a9d8f;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -221,7 +233,6 @@
         <div>Policies: <span id="policies">0</span></div>
         <div>Money: $<span id="money">0</span></div>
         <div id="revenue">Revenue: $0/sec</div>
-        <div id="policies-per-sec">Policies: 0/sec</div>
         <div id="public-opinion" style="display: none">
             Public Opinion: <span id="opinion-value">50</span>/100 
             <span id="opinion-trend">😐</span>

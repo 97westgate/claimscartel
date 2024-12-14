@@ -131,7 +131,8 @@ class Game {
     }
 
     collectPremiums() {
-        const premiumsCollected = this.policies * (this.premiumRate / 1);
+        const opinionMultiplier = this.publicOpinionVisible ? (this.publicOpinion / 50) : 1;
+        const premiumsCollected = this.policies * (this.premiumRate / 1) * opinionMultiplier;
         this.money += premiumsCollected;
         this.updateDisplay();
     }
@@ -185,7 +186,6 @@ class Game {
         this.policiesDisplay.textContent = Math.floor(this.policies);
         this.moneyDisplay.textContent = Math.floor(this.money).toLocaleString();
         this.revenueDisplay.textContent = `Revenue: $${Math.floor(this.policies * this.premiumRate)}/sec`;
-        this.policiesPerSecDisplay.textContent = `Policies: ${this.policiesPerSecond.toFixed(1)}/sec`;
 
         // Update employee upgrade
         const employee = this.upgrades.employee;

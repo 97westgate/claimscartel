@@ -5,6 +5,18 @@ class Claim {
         this.timeLimit = timeLimit;
         this.status = "pending";
         this.createdAt = Date.now();
+        // Add claim types with different characteristics
+        this.type = this.generateClaimType();
+    }
+
+    generateClaimType() {
+        const types = [
+            { name: "Routine Checkup", multiplier: 0.8, icon: "🏥" },
+            { name: "Emergency", multiplier: 2.0, icon: "🚑" },
+            { name: "Prescription", multiplier: 0.5, icon: "💊" },
+            { name: "Surgery", multiplier: 3.0, icon: "🔪" }
+        ];
+        return types[Math.floor(Math.random() * types.length)];
     }
 }
 
@@ -30,6 +42,9 @@ class ClaimsManager {
         
         // Update display every second
         setInterval(() => this.updateClaimTimers(), 1000);
+        
+        this.claimHistory = [];
+        this.maxHistoryLength = 10;
     }
 
     checkClaimsSystemActivation() {
@@ -50,20 +65,15 @@ class ClaimsManager {
         if (this.game.isPaused || !this.isClaimsSystemActive) return;
         
         const randomCheck = Math.random();
-        console.log('Checking for new claims:', {
-            policies: this.game.policies,
-            randomCheck,
-            probability: this.claimProbability,
-            willGenerateClaim: randomCheck < this.claimProbability
-        });
         
         if (randomCheck < this.claimProbability) {
             const baseAmount = Math.floor(Math.random() * 1000) + 500;
             const claim = new Claim(baseAmount);
+            // Adjust amount based on claim type multiplier
+            claim.amount = Math.round(claim.amount * claim.type.multiplier);
             this.activeClaims.set(claim.id, claim);
             
-            console.log('New claim generated:', claim);
-            this.game.showEventMessage(`New claim received: $${claim.amount} 📋`);
+            this.game.showEventMessage(`New ${claim.type.name} claim: $${claim.amount} ${claim.type.icon}`);
         }
     }
 
@@ -72,11 +82,11 @@ class ClaimsManager {
         const claim = this.activeClaims.get(claimId);
         if (!claim) return;
         
-        // Show claim event modal
+        // Show claim event modal with type info
         const claimEvent = {
-            name: "Insurance Claim",
-            emoji: "🏥",
-            description: `Claim amount: $${claim.amount}`,
+            name: claim.type.name,
+            emoji: claim.type.icon,
+            description: `Amount: $${claim.amount.toLocaleString()}\nType: ${claim.type.name}`,
             choices: [
                 {
                     text: "Pay Claim",
@@ -109,11 +119,11 @@ class ClaimsManager {
             const claimElement = document.createElement('div');
             claimElement.className = `claim-item ${timeRemaining < 10 ? 'urgent' : ''}`;
             
-            // Make claim clickable
             claimElement.style.cursor = 'pointer';
             claimElement.onclick = () => this.handleClaim(id);
             
             claimElement.innerHTML = `
+                <div class="claim-type">${claim.type.icon} ${claim.type.name}</div>
                 <div class="claim-amount">$${claim.amount.toLocaleString()}</div>
                 <div class="claim-time">${Math.ceil(timeRemaining)}s</div>
                 <div class="claim-timer" style="width: ${percentageRemaining}%"></div>
@@ -126,6 +136,19 @@ class ClaimsManager {
     resolveClaim(claimId, status) {
         const claim = this.activeClaims.get(claimId);
         if (!claim) return;
+
+        // Add to history
+        this.claimHistory.unshift({
+            type: claim.type.name,
+            amount: claim.amount,
+            status: status,
+            timestamp: new Date()
+        });
+
+        // Keep history at max length
+        if (this.claimHistory.length > this.maxHistoryLength) {
+            this.claimHistory.pop();
+        }
 
         claim.status = status;
         
