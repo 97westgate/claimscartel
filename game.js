@@ -106,6 +106,18 @@ class Game {
             s.sound.playbackRate = s.rate;
             s.sound.volume = s.volume;
         });
+
+        // Preload click sounds with slight variations
+        this.clickSounds = [
+            { sound: new Audio('click.mp3'), rate: 0.9, volume: 0.2 },
+            { sound: new Audio('click.mp3'), rate: 1.0, volume: 0.2 },
+            { sound: new Audio('click.mp3'), rate: 1.1, volume: 0.2 },
+        ];
+        this.currentClickNote = 0;
+        this.clickSounds.forEach(s => {
+            s.sound.playbackRate = s.rate;
+            s.sound.volume = s.volume;
+        });
     }
 
     generateAutomaticPolicies() {
@@ -211,7 +223,6 @@ class Game {
         popupSound.volume = 0.2;
         popupSound.play();
         
-        // Pause the game when showing modal
         this.isPaused = true;
         
         modal.innerHTML = `
@@ -228,6 +239,12 @@ class Game {
             const button = document.createElement('button');
             button.textContent = choice.text;
             button.onclick = () => {
+                // Play choice sound with different settings
+                const choiceSound = new Audio('popup.mp3');
+                choiceSound.volume = 0.1;  // Lower volume for choice
+                choiceSound.playbackRate = 1.2;  // Slightly faster for snappier feedback
+                choiceSound.play();
+
                 choice.effect(this);
                 document.body.removeChild(modal);
                 this.isPaused = false;
@@ -250,6 +267,24 @@ class Game {
                 // Show modal for choice-based events
                 this.showEventModal(event);
             } else {
+                // Create notification sound using Web Audio API
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+                oscillator.frequency.setValueAtTime(1108.73, audioContext.currentTime + 0.1); // C#6
+
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.3);
+                
                 // Directly trigger effect for notification events
                 event.effect(this);
             }

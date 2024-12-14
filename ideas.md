@@ -4,6 +4,8 @@ Actually follow how Richard Burke did it.
 
 Obviously when you click away you're still making money.
 
+Visually represent how much money you have compared to the average American.
+
 # GAME MECHANICS
 
 There needs to be more randomness, random events.
@@ -32,8 +34,14 @@ Maybe the first hi should be "I'm ready to sell some insurance!"
 
 For clipboard it should be different sounds each time or lead to a sing-song-y melody?
 
+Music for each phase.
+
+Negative sounds and positive sounds based on choices / outcomes.
+
+Different music as you get richer.
+
 # LEADERBOARD
 
 See how fast other people have gotten to the top across the globe, your country, amongst your friends.
 
-# 
+#
