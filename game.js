@@ -665,12 +665,29 @@ class Game {
     // Upgrade market presence
     upgradeMarket(marketKey) {
         const market = this.markets[marketKey];
+        if (!market || this.currentMarket === marketKey) return;
+        
         if (this.money >= market.cost && this.policies >= market.unlocksAt) {
+            // Add animation for the cost
+            const button = document.querySelector(`[data-market="${marketKey}"]`);
+            if (button) {
+                this.createFloatingNumber(button, `-$${market.cost.toLocaleString()}`);
+                button.classList.add('upgrade-clicked');
+                setTimeout(() => button.classList.remove('upgrade-clicked'), 150);
+            }
+
             this.money -= market.cost;
             this.currentMarket = marketKey;
             this.revenueMultipliers.marketExpansion = market.multiplier;
             this.showEventMessage(`🌎 Expanded to ${market.name}!`);
-            this.updateDisplay();
+            this.updateAllDisplays();
+        } else {
+            // Show denial animation if can't afford
+            const button = document.querySelector(`[data-market="${marketKey}"]`);
+            if (button) {
+                button.classList.add('upgrade-denied');
+                setTimeout(() => button.classList.remove('upgrade-denied'), 300);
+            }
         }
     }
 
@@ -692,18 +709,97 @@ class Game {
         Object.entries(this.upgrades).forEach(([key, upgrade]) => {
             const div = document.createElement('div');
             div.className = 'upgrade-item';
+            div.dataset.upgrade = key;  // Add data attribute for targeting
             div.innerHTML = `
-                <span class="upgrade-label">${upgrade.name} ($<span id="${key}-cost">${upgrade.cost.toLocaleString()}</span>)</span>
+                <span class="upgrade-label">
+                    ${upgrade.name} 
+                    <span class="cost-container">($<span id="${key}-cost">${upgrade.cost.toLocaleString()}</span>)</span>
+                </span>
                 <button id="${key}-button" class="emoji-button">${upgrade.emoji}</button>
                 <span id="${key}-count" class="upgrade-count"></span>
                 <div class="upgrade-description">${upgrade.description || ''}</div>
             `;
             upgradesContainer.appendChild(div);
 
-            // Add click handler
-            document.getElementById(`${key}-button`).addEventListener('click', () => {
-                this.purchaseUpgrade(key);
+            // Add click handler with animation
+            const button = document.getElementById(`${key}-button`);
+            button.addEventListener('click', () => {
+                if (this.money >= upgrade.cost) {
+                    button.classList.add('upgrade-clicked');
+                    const costElement = div.querySelector('.cost-container');
+                    costElement.classList.add('cost-flash');
+                    
+                    // Create floating number animation
+                    this.createFloatingNumber(button, `-$${upgrade.cost.toLocaleString()}`);
+                    
+                    setTimeout(() => {
+                        button.classList.remove('upgrade-clicked');
+                        costElement.classList.remove('cost-flash');
+                    }, 150);
+                    
+                    this.purchaseUpgrade(key);
+                } else {
+                    button.classList.add('upgrade-denied');
+                    setTimeout(() => button.classList.remove('upgrade-denied'), 300);
+                }
             });
+        });
+    }
+
+    createFloatingNumber(element, text, type = 'cost') {
+        const rect = element.getBoundingClientRect();
+        const floater = document.createElement('div');
+        floater.className = `floating-number ${type}`;
+        floater.textContent = text;
+        floater.style.left = `${rect.left + rect.width / 2}px`;
+        floater.style.top = `${rect.top}px`;
+        document.body.appendChild(floater);
+        
+        // Remove after animation completes
+        setTimeout(() => floater.remove(), 1000);
+    }
+
+    updateUpgradeDisplay() {
+        Object.entries(this.upgrades).forEach(([key, upgrade]) => {
+            const countElement = document.getElementById(`${key}-count`);
+            const buttonElement = document.getElementById(`${key}-button`);
+            const costElement = document.getElementById(`${key}-cost`);
+            const container = buttonElement.closest('.upgrade-item');
+
+            // Show/hide based on unlock requirements with animation
+            const isUnlocked = this.policies >= (upgrade.unlocksAt || 0);
+            
+            if (isUnlocked && container.style.display === 'none') {
+                container.style.display = 'grid';
+                container.classList.add('upgrade-appear');
+                setTimeout(() => container.classList.remove('upgrade-appear'), 500);
+            } else if (!isUnlocked) {
+                container.style.display = 'none';
+            }
+            
+            if (isUnlocked) {
+                // Update count with animation if it changed
+                if (upgrade.count > 0) {
+                    const newText = `${upgrade.emoji.repeat(Math.min(upgrade.count, 5))} (${(upgrade.count * upgrade.policiesPerSecond).toFixed(1)}/sec)`;
+                    if (countElement.textContent !== newText) {
+                        countElement.classList.add('count-update');
+                        countElement.textContent = newText;
+                        setTimeout(() => countElement.classList.remove('count-update'), 300);
+                    }
+                } else {
+                    countElement.textContent = '';
+                }
+
+                // Update cost with animation if it changed
+                const newCost = upgrade.cost.toLocaleString();
+                if (costElement.textContent !== newCost) {
+                    costElement.classList.add('cost-update');
+                    costElement.textContent = newCost;
+                    setTimeout(() => costElement.classList.remove('cost-update'), 300);
+                }
+
+                buttonElement.disabled = this.money < upgrade.cost;
+            }
         });
     }
 
@@ -755,35 +851,6 @@ class Game {
         this.updateRevenue();
     }
 
-    updateUpgradeDisplay() {
-        Object.entries(this.upgrades).forEach(([key, upgrade]) => {
-            const countElement = document.getElementById(`${key}-count`);
-            const buttonElement = document.getElementById(`${key}-button`);
-            const costElement = document.getElementById(`${key}-cost`);
-            const container = buttonElement.closest('.upgrade-item');
-
-            // Show/hide based on unlock requirements
-            const isUnlocked = this.policies >= (upgrade.unlocksAt || 0);
-            
-            if (isUnlocked) {
-                container.style.display = 'grid';
-                
-                // Update count and production
-                if (upgrade.count > 0) {
-                    countElement.textContent = `${upgrade.emoji.repeat(Math.min(upgrade.count, 5))} (${(upgrade.count * upgrade.policiesPerSecond).toFixed(1)}/sec)`;
-                } else {
-                    countElement.textContent = '';
-                }
-
-                // Update cost and availability
-                costElement.textContent = upgrade.cost.toLocaleString();
-                buttonElement.disabled = this.money < upgrade.cost;
-            } else {
-                container.style.display = 'none';
-            }
-        });
-    }
-
     updateMarketDisplay() {
         const marketButtons = document.querySelectorAll('.market-button');
         marketButtons.forEach(button => {
@@ -794,19 +861,26 @@ class Game {
             // Show/hide based on unlock requirements
             if (this.policies >= market.unlocksAt) {
                 container.classList.remove('locked');
-                button.disabled = this.money < (market.cost || 0);
                 
-                // Highlight current market
-                if (this.currentMarket === marketKey) {
+                // Check both money and current market status
+                const canAfford = this.money >= (market.cost || 0);
+                const isCurrentMarket = this.currentMarket === marketKey;
+                
+                button.disabled = !canAfford || isCurrentMarket;
+                
+                // Update button text and style based on status
+                if (isCurrentMarket) {
                     container.classList.add('active');
                     button.textContent = 'Active';
+                    button.disabled = true;
                 } else {
                     container.classList.remove('active');
-                    button.textContent = 'Expand';
+                    button.textContent = canAfford ? 'Expand' : `Need $${market.cost.toLocaleString()}`;
                 }
             } else {
                 container.classList.add('locked');
                 button.disabled = true;
+                button.textContent = `Unlock at ${market.unlocksAt.toLocaleString()} policies`;
             }
         });
     }
@@ -822,17 +896,22 @@ class Game {
             if (this.policies >= policy.unlocksAt) {
                 container.classList.remove('locked');
                 
-                // Highlight current policy
-                if (this.currentPolicyType === policyKey) {
+                // Check if this is the current policy
+                const isCurrentPolicy = this.currentPolicyType === policyKey;
+                
+                if (isCurrentPolicy) {
                     container.classList.add('active');
                     button.textContent = 'Active';
+                    button.disabled = true;
                 } else {
                     container.classList.remove('active');
                     button.textContent = 'Switch';
+                    button.disabled = false;
                 }
             } else {
                 container.classList.add('locked');
                 button.disabled = true;
+                button.textContent = `Unlock at ${policy.unlocksAt.toLocaleString()} policies`;
             }
         });
     }
@@ -855,5 +934,5 @@ class Game {
 // Start the game when the page loads
 window.onload = () => {
     // You can now start with different initial states
-    const game = new Game('NATIONAL');  // or 'LATE_GAME', 'RICH', etc.
+    const game = new Game('NEW_GAME');  // or 'LATE_GAME', 'RICH', etc.
 };

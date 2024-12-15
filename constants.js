@@ -40,7 +40,7 @@ const INITIAL_STATES = {
         employees: 10
     },
     NATIONAL: {
-        policies: 1000,
+        policies: 5000,
         money: 1000000,
         employees: 25
     },
