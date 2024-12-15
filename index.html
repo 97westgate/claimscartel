@@ -358,7 +358,148 @@
             transform: scale(1.1);
             color: #e76f51;
         }
+
+        .map-panel {
+            margin-top: 20px;
+            width: 600px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .mn-stats {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-row span:first-child {
+            color: #666;
+        }
+
+        .stat-row span:last-child {
+            font-weight: bold;
+            color: #2a9d8f;
+        }
+
+        .map-visualization {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .map-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .map-row {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .map-cell {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .map-cell:hover {
+            transform: scale(1.1);
+        }
+
+        .map-cell.covered {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #minnesota-map {
+            height: 400px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .city-marker {
+            font-size: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .city-marker:hover {
+            transform: scale(1.2);
+        }
+
+        .city-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+            text-shadow: 1px 1px 1px white;
+        }
+
+        .city-icon {
+            background: none;
+            border: none;
+        }
+
+        .hospital-marker {
+            font-size: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .hospital-marker:hover {
+            transform: scale(1.2);
+        }
+
+        .hospital-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+            background: white;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            text-shadow: 1px 1px 1px white;
+        }
+
+        .hospital-beds {
+            font-size: 10px;
+            color: #2a9d8f;
+            margin-top: 2px;
+        }
     </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body>
     <h1>Coverage Cartel</h1>
@@ -393,6 +534,10 @@
         <div id="milestones-list"></div>
     </div>
 
+    <div id="map-container" class="map-panel">
+        <h2>🗺️ Market Expansion</h2>
+    </div>
+
     <!-- Add audio elements -->
     <audio id="clickSound" preload="auto">
         <source src="click.mp3" type="audio/mpeg">
@@ -408,6 +553,9 @@
     <script src="constants.js"></script>
     <script src="claims.js"></script>
     <script src="events.js"></script>
+    <script src="map.js"></script>
     <script src="game.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
 </body>
 </html>

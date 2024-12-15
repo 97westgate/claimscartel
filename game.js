@@ -136,6 +136,9 @@ class Game {
         // Add title reference
         this.titleElement = document.querySelector('h1');
         this.currentTitle = "Small Insurance Business"; // Default title
+
+        // Initialize map
+        this.map = new InsuranceMap(this);
     }
 
     generateAutomaticPolicies() {
@@ -510,5 +513,5 @@ class Game {
 // Start the game when the page loads
 window.onload = () => {
     // You can now start with different initial states
-    const game = new Game('CLAIMS_START');  // or 'LATE_GAME', 'RICH', etc.
+    const game = new Game('NEW_GAME');  // or 'LATE_GAME', 'RICH', etc.
 };
