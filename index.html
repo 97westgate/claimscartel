@@ -498,6 +498,35 @@
             color: #2a9d8f;
             margin-top: 2px;
         }
+
+        @keyframes hospitalClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.85); }
+            100% { transform: scale(1.1); }
+        }
+
+        .hospital-marker.clicked {
+            animation: hospitalClick 0.15s ease-in-out;
+        }
+
+        .coverage-area {
+            fill: #2a9d8f;
+            fill-opacity: 0.1;
+            stroke: #2a9d8f;
+            stroke-width: 1;
+            stroke-opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .coverage-area.coverage-growing {
+            animation: coveragePulse 0.3s ease-out;
+        }
+
+        @keyframes coveragePulse {
+            0% { fill-opacity: 0.1; }
+            50% { fill-opacity: 0.3; }
+            100% { fill-opacity: 0.1; }
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
@@ -508,13 +537,11 @@
         <div>Policies: <span id="policies">0</span></div>
         <div>Money: $<span id="money">0</span></div>
         <div id="revenue">Revenue: $0/sec</div>
-        <div id="public-opinion" style="display: none">
-            Public Opinion: <span id="opinion-value">50</span>/100 
-            <span id="opinion-trend">😐</span>
-        </div>
     </div>
 
-    <div id="clickable">📋</div>
+    <div id="map-container" class="map-panel">
+        <h2>🗺️ Market Expansion</h2>
+    </div>
 
     <div id="upgrades">
         <div class="upgrade-item">
@@ -532,10 +559,6 @@
     <div id="milestones" class="milestones-panel">
         <h2>🎯 Company Goals</h2>
         <div id="milestones-list"></div>
-    </div>
-
-    <div id="map-container" class="map-panel">
-        <h2>🗺️ Market Expansion</h2>
     </div>
 
     <!-- Add audio elements -->

@@ -27,7 +27,6 @@ class Game {
         };
 
         // Get DOM elements
-        this.clickable = document.getElementById('clickable');
         this.policiesDisplay = document.getElementById('policies');
         this.moneyDisplay = document.getElementById('money');
         this.revenueDisplay = document.getElementById('revenue');
@@ -56,9 +55,6 @@ class Game {
                 this.purchaseUpgrade('employee');
             }
         });
-
-        // Bind click handler
-        this.clickable.addEventListener('click', () => this.handleClick());
 
         // Start automatic policy generation
         setInterval(() => {
@@ -163,9 +159,6 @@ class Game {
         const clickSound = new Audio('click.mp3');
         clickSound.volume = 0.2;
         clickSound.play();
-        
-        this.clickable.classList.add('clicked');
-        setTimeout(() => this.clickable.classList.remove('clicked'), 150);
         
         this.updateDisplay();
     }
