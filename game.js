@@ -4,8 +4,8 @@ class Game {
         const state = INITIAL_STATES[initialState];
         
         // Initialize with either provided state or defaults
-        this.policies = state.policies;
-        this.money = state.money;
+        this.policies = state.policies || 0;
+        this.money = Math.max(0, state.money || 0); // Prevent negative starting money
         this.policyValue = 100;
         this.premiumRate = 10; // $ per policy per second
         this.manualPoliciesLastSecond = 0;
@@ -30,13 +30,14 @@ class Game {
             employee: { 
                 cost: 1000, 
                 multiplier: 2, 
-                count: state.employees,  // Use initial employees count
+                count: state.employees || 0,
                 baseCost: 1000,
                 name: "Hire Employee",
                 emoji: "👨‍💼",
                 policiesPerSecond: 0.1,
                 unlocksAt: 25,
-                description: "Hire staff to sell policies automatically"
+                description: "Hire staff to sell policies automatically",
+                visible: false // Add visibility flag
             },
             manager: {
                 cost: 100000,
@@ -301,6 +302,15 @@ class Game {
                 this.updateSalaryAndProfit();
             }
         }, 1000);
+
+        // After initializing upgrades:
+        this.soundManager = new SoundManager();
+
+        // Add this right after upgrades initialization:
+        const upgradesContainer = document.getElementById('upgrades');
+        if (upgradesContainer) {
+            upgradesContainer.style.display = 'none'; // Hide initially
+        }
     }
 
     generateAutomaticPolicies() {
@@ -565,22 +575,36 @@ class Game {
     }
 
     completeMilestone(id, milestone) {
-        this.completedMilestones.add(id);
-        
-        // Update company title with animation
-        this.currentTitle = milestone.name;
-        this.titleElement.textContent = this.currentTitle;
-        this.titleElement.classList.add('milestone-reached');
-        setTimeout(() => this.titleElement.classList.remove('milestone-reached'), 500);
-        
-        // Show achievement notification
-        this.showEventMessage(`🎯 Milestone: ${milestone.name}! ${milestone.reward}`);
+        if (!this.completedMilestones.has(id)) {
+            this.completedMilestones.add(id);
+            
+            // Play sound using sound manager
+            if (this.soundManager) {
+                this.soundManager.playEventSound('milestone');
+            }
 
-        // Play achievement sound
-        const sound = new Audio('popup.mp3');
-        sound.volume = 0.3;
-        sound.playbackRate = 1.5;
-        sound.play();
+            // Show notification
+            const notificationElement = document.getElementById('milestone-notification');
+            if (notificationElement) {
+                notificationElement.textContent = `Achievement Unlocked: ${milestone.name}`;
+                notificationElement.style.display = 'block';
+                
+                setTimeout(() => {
+                    notificationElement.style.display = 'none';
+                }, 3000);
+            }
+
+            // Update milestones list
+            this.updateMilestonesDisplay();
+
+            // Show event message
+            this.showEventMessage(`🎯 Milestone achieved: ${milestone.name}!`);
+
+            // Check for special milestone effects
+            if (id === 'STARTUP_FUNDING') {
+                this.checkUpgradeVisibility();
+            }
+        }
     }
 
     updateMilestonesDisplay() {
@@ -1041,8 +1065,39 @@ class Game {
 
         return totalCosts;
     }
+
+    checkUpgradeVisibility() {
+        const upgradesContainer = document.getElementById('upgrades');
+        if (!upgradesContainer) return;
+
+        // Check if employees should be unlocked
+        if (this.policies >= 25 && !this.upgrades.employee.visible) {
+            this.upgrades.employee.visible = true;
+            upgradesContainer.style.display = 'block';
+            this.showEventMessage("👥 You can now hire employees!");
+        }
+
+        // Update individual upgrade visibility
+        Object.entries(this.upgrades).forEach(([key, upgrade]) => {
+            const container = document.querySelector(`[data-upgrade="${key}"]`);
+            if (container) {
+                container.style.display = this.policies >= upgrade.unlocksAt ? 'grid' : 'none';
+            }
+        });
+    }
+
+    startPeriodicChecks() {
+        setInterval(() => {
+            if (!this.isPaused) {
+                this.checkUpgradeVisibility();
+                this.checkMilestones();
+                this.updateAllDisplays();
+            }
+        }, 1000);
+    }
 }
 
 window.onload = () => {
-    const game = new EnhancedGame('NEW_GAME');
+    const game = new Game('NEW_GAME');
+    game.startPeriodicChecks();
 };
