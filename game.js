@@ -305,6 +305,7 @@ class Game {
 
         // After initializing upgrades:
         this.soundManager = new SoundManager();
+        this.soundManager.initializeSounds();
 
         // Add this right after upgrades initialization:
         const upgradesContainer = document.getElementById('upgrades');
@@ -333,6 +334,10 @@ class Game {
                 description: "Offer property coverage"
             }
         };
+
+        // Add near the beginning of constructor
+        this.policyGainPopups = [];
+        this.lastPopupTime = 0;
     }
 
     generateAutomaticPolicies() {
@@ -362,14 +367,24 @@ class Game {
     handleClick() {
         if (this.isPaused) return;
         
-        this.policies++;
+        // Base policy gain
+        let policiesGained = 1;
         
-        const clickSound = new Audio('click.mp3');
-        clickSound.volume = 0.2;
-        clickSound.play();
+        // Early game multiplier (reduces as you progress)
+        const earlyGameBonus = Math.max(1, 5 - (this.policies / 20));
+        policiesGained *= earlyGameBonus;
+        
+        // Add policies with satisfying visual/audio feedback
+        this.policies += policiesGained;
+        this.showPolicyGainPopup(policiesGained);
+        this.soundManager.playClickSound();
+        
+        // Early game tutorial messages
+        if (this.policies === 1) {
+            this.showEventMessage("🎉 First policy sold! Keep growing to unlock employees!");
+        }
         
         this.updateDisplay();
-        this.map.updateCoverage();
     }
 
     purchaseUpgrade(upgradeKey) {
@@ -381,10 +396,8 @@ class Game {
             this.policyValue *= upgrade.multiplier;
             upgrade.count++;
             
-            const sound = this.upgradeSounds[Math.floor(Math.random() * this.upgradeSounds.length)];
-            sound.sound.volume = 0.3;
-            sound.sound.currentTime = 0;
-            sound.sound.play();
+            // Use sound manager instead of direct sound playing
+            this.soundManager.playUpgradeSound();
 
             const button = document.getElementById('employee-button');
             button.classList.add('clicked');
@@ -1140,6 +1153,45 @@ class Game {
             return true;
         }
         return false;
+    }
+
+    // Add this new method
+    showPolicyGainPopup(amount) {
+        // Limit popup frequency
+        const now = Date.now();
+        if (now - this.lastPopupTime < 50) return;
+        this.lastPopupTime = now;
+
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = 'policy-gain-popup';
+        popup.textContent = `+${amount.toFixed(1)}`;
+
+        // Position popup near cursor or map
+        const map = document.getElementById('minnesota-map');
+        if (map) {
+            const rect = map.getBoundingClientRect();
+            const x = Math.random() * (rect.width - 60) + rect.left;
+            const y = Math.random() * (rect.height - 40) + rect.top;
+            
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+        }
+
+        // Add to document and track
+        document.body.appendChild(popup);
+        this.policyGainPopups.push(popup);
+
+        // Animate and remove
+        requestAnimationFrame(() => {
+            popup.style.transform = `translateY(-50px)`;
+            popup.style.opacity = '0';
+        });
+
+        setTimeout(() => {
+            document.body.removeChild(popup);
+            this.policyGainPopups = this.policyGainPopups.filter(p => p !== popup);
+        }, 1000);
     }
 }
 

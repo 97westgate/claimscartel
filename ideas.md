@@ -139,3 +139,17 @@ b) animation when policy increases
 c) previously covered area should still be covered
 d) fun shape
 e) coverage doesnt overlap
+
+
+
+Early Game Boosts
+First 50 policies give 2x revenue
+First employee costs 50% less
+Early claims are simpler and more likely to be legitimate
+Initial public opinion starts high (80%) and declines with company size
+These changes would:
+Give players immediate satisfaction from clicking
+Show clear progression path towards the $90B goal
+Provide frequent early rewards and feedback
+Make the initial growth feel more impactful
+Teach game mechanics gradually through natural progression
