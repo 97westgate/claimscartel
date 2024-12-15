@@ -1,5 +1,8 @@
 # Core Historical Mechanics for 1974–1975
 
+https://www.startribune.com/unitedhealth-group-founder-to-retire-from-the-board-after-more-than-40-years/600168065
+https://prospect.org/health/2023-12-20-building-a-giant-unitedhealth/
+
 ## 1. Diversification into HMOs
 - **Mechanic:** Transition from selling standalone policies to **offering HMO plans**.
   - Players can "invest" resources into developing an HMO model, which trades higher upfront costs (for infrastructure and staffing) for steady, long-term revenue from membership premiums.

@@ -1,3 +1,11 @@
+## Overall
+
+XYZ in revenue, profit, i.e. shareholder value, your own salary needs to be huge.
+
+The game should take 20 minutes to play. It spans 1974-2024.
+
+##
+
 It can't exceed the total population of the US.
 
 Actually follow how Richard Burke did it.
@@ -21,7 +29,7 @@ Probability of claims should go up with the number of policies.
 
 As you delay processing something should go up.
 
-Events must be paused while modal is open. - this seems to not work when several modals are "queued up".
+Events must be paused while modal is open.
 
 Clicking it should be more satisfying and/or not possible after a while?
 
@@ -41,7 +49,7 @@ Number of choices need to be randomized as well as outcome needs to be randomize
 
 Use separate randomization functions with different algorithms, randomize which one is likely.
 
-Random boxes that pop up over time for increased bonuses.
+Random boxes that pop up over time for increased bonuses i.e. random drops.
 
 Little mini games.
 
@@ -95,11 +103,6 @@ See how fast other people have gotten to the top across the globe, your country,
 Cursor should only be used for the game logic. Populating events should be done by a separate agent.
 
 Deciding "when" to trigger upgrades should be done by a separate agent.
-
-
-# GOALS
-
-XYZ in revenue, profit, i.e. shareholder value, your own salary needs to be huge.
 
 
 ## outside thoughts

@@ -37,31 +37,85 @@ const MILESTONES = {
     SMALL_BUSINESS: {
         name: "Small Insurance Business",
         policies: 10,
-        description: "Handle your first claims",
+        description: "Handle your first claims.",
         reward: "Claims system unlocked"
     },
     REGIONAL_PLAYER: {
         name: "Regional Player",
         policies: 50,
-        description: "Start influencing public opinion",
+        description: "Expand your influence into neighboring states.",
         reward: "Public opinion system unlocked"
     },
     CORPORATE_POWER: {
         name: "Corporate Power",
         policies: 100,
         employees: 10,
-        description: "Your size attracts government attention",
+        description: "Your size attracts government attention.",
         reward: "Lobbying system unlocked"
     },
-    CARTEL_STATUS: {
-        name: "Insurance Cartel",
+    HMO_PIONEER: {
+        name: "HMO Pioneer",
         policies: 200,
-        money: 100000,
-        publicOpinion: 30,
-        description: "Maximum profit, minimum payout",
+        description: "Introduce managed care and redefine the industry.",
+        reward: "HMO plans unlocked"
+    },
+    NETWORK_BUILDER: {
+        name: "Network Builder",
+        policies: 500,
+        description: "Establish partnerships with providers nationwide.",
+        reward: "Provider network system unlocked"
+    },
+    NATIONAL_PLAYER: {
+        name: "National Player",
+        policies: 1000,
+        money: 1000000,
+        description: "Expand operations across the country.",
+        reward: "Corporate branding boost (+20% premium revenue)"
+    },
+    HEALTHCARE_MONOPOLY: {
+        name: "Healthcare Monopoly",
+        policies: 2000,
+        employees: 50,
+        description: "Dominate the private insurance market.",
+        reward: "Market control: reduce competition penalties"
+    },
+    GLOBAL_EXPANSION: {
+        name: "Global Expansion",
+        policies: 5000,
+        money: 5000000,
+        publicOpinion: 80,
+        description: "Launch operations in international markets.",
+        reward: "Global network unlocked (+50% policy growth rate)"
+    },
+    POLICY_CARTEL: {
+        name: "Policy Cartel",
+        policies: 10000,
+        money: 20000000,
+        description: "Control healthcare access at an unprecedented scale.",
+        reward: "Dynamic pricing unlocked (adjust premiums for profit)"
+    },
+    PUBLIC_HEALTH_INNOVATOR: {
+        name: "Public Health Innovator",
+        policies: 20000,
+        description: "Invest in preventative care and public health programs.",
+        reward: "Preventative care reduces claim frequency by 25%"
+    },
+    INSURANCE_EMPIRE: {
+        name: "Insurance Empire",
+        policies: 50000,
+        money: 500000000,
+        description: "Achieve massive scale and unparalleled influence.",
+        reward: "Empire tier: prestige unlock (revenue multiplier)"
+    },
+    FINAL_GOAL: {
+        name: "Healthcare Titan",
+        policies: 100000,
+        money: 90000000000,
+        description: "Achieve $90 billion in revenue and cement your legacy.",
         reward: "Victory!"
     }
 };
+
 
 // Track achievements
 const ACHIEVEMENTS = {
