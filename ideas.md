@@ -153,3 +153,21 @@ Show clear progression path towards the $90B goal
 Provide frequent early rewards and feedback
 Make the initial growth feel more impactful
 Teach game mechanics gradually through natural progression
+
+
+unlocks the next thing within company goals, unlocks should be close to locks
+policy is a dot on the map, each dot produces money
+see there's a hospital outside the map, then start going in that direction
+Employees need to be dropped onto the hospital and the hospital is pulsating as long as an employee is there.
+Regional manager can click a certain area.
+See competitors on the map and buy the person. Swallow animation is funny. Their color changes to my color.
+Let user choose their favorite color to begin with - meaningful choice.
+
+All names and stuff should be funnier.
+
+One thing should grow the coverage area, one should sell policies.
+
+
+
+END GAME:
+Wow you won capitalism. Good job! Great! Here's a sticker. Avoid going to the board meeting in December.
