@@ -88,6 +88,7 @@ class InsuranceMap {
         this.hospitals = new Map();
         
         this.setupDisplay();
+        this.specializationBonuses = new Map();
     }
 
     generatePath() {
@@ -254,6 +255,37 @@ class InsuranceMap {
             });
     }
 
+    applySpecializationBonus(hospital, specialization) {
+        if (!this.specializationBonuses.has(hospital.name)) {
+            this.specializationBonuses.set(hospital.name, new Set());
+        }
+        
+        const hospitalBonuses = this.specializationBonuses.get(hospital.name);
+        if (!hospitalBonuses.has(specialization)) {
+            hospitalBonuses.add(specialization);
+            
+            // Increase coverage area based on specialization
+            const radiusBonus = {
+                health: 1.3,    // 30% larger radius
+                life: 1.2,      // 20% larger radius
+                property: 1.15  // 15% larger radius
+            }[specialization] || 1;
+
+            const currentRadius = this.maxRadiuses.get(hospital.name);
+            const newRadius = currentRadius.map(r => r * radiusBonus);
+            this.maxRadiuses.set(hospital.name, newRadius);
+            this.targetRadiuses.set(hospital.name, newRadius);
+            
+            // Visual feedback
+            const marker = this.hospitals.get(hospital.name);
+            const icon = marker._icon.querySelector('.hospital-marker');
+            icon.classList.add('specialized');
+            setTimeout(() => icon.classList.remove('specialized'), 1000);
+            
+            this.game.showEventMessage(`🏥 ${hospital.name} now specializes in ${specialization} insurance!`);
+        }
+    }
+
     addHospital(hospital) {
         if (this.hospitals.has(hospital.name)) return;
 
@@ -301,6 +333,11 @@ class InsuranceMap {
             
             this.game.showEventMessage(`🏥 New Hospital Available: ${hospital.name} in ${hospital.city}!`);
         }
+        Object.entries(this.game.specializations).forEach(([type, spec]) => {
+            if (spec.level > 0) {
+                this.applySpecializationBonus(hospital, type);
+            }
+        });
     }
 
     checkHospitalUnlocks() {

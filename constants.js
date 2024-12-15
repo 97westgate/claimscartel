@@ -205,6 +205,106 @@ const ACHIEVEMENTS = {
     }
 };
 
+const SPECIALIZATIONS = {
+    HEALTH: {
+        name: "Health Insurance",
+        baseMultiplier: 1.0,
+        upgrades: [
+            { level: 1, cost: 100000, bonus: "Claims processing +10%" },
+            { level: 2, cost: 250000, bonus: "Public opinion impact -20%" },
+            { level: 3, cost: 1000000, bonus: "Revenue multiplier +20%" }
+        ]
+    },
+    LIFE: {
+        name: "Life Insurance",
+        baseMultiplier: 1.2,
+        upgrades: [
+            { level: 1, cost: 150000, bonus: "Fraud detection +15%" },
+            { level: 2, cost: 300000, bonus: "Investment returns +10%" },
+            { level: 3, cost: 1200000, bonus: "Revenue multiplier +25%" }
+        ]
+    },
+    PROPERTY: {
+        name: "Property Insurance",
+        baseMultiplier: 1.5,
+        upgrades: [
+            { level: 1, cost: 200000, bonus: "Processing speed +20%" },
+            { level: 2, cost: 400000, bonus: "Market expansion -15% cost" },
+            { level: 3, cost: 1500000, bonus: "Revenue multiplier +30%" }
+        ]
+    }
+};
+
+const RESEARCH_PROJECTS = {
+    EFFICIENCY: {
+        name: "Operational Efficiency",
+        baseCost: 50000,
+        baseTime: 300,  // seconds
+        effects: ["Processing costs -10%", "Employee effectiveness +15%"]
+    },
+    RISK_MANAGEMENT: {
+        name: "Risk Assessment",
+        baseCost: 75000,
+        baseTime: 600,
+        effects: ["Fraud detection +20%", "Claim accuracy +15%"]
+    },
+    MARKET_EXPANSION: {
+        name: "Market Analysis",
+        baseCost: 100000,
+        baseTime: 900,
+        effects: ["Market expansion costs -20%", "New market revenue +10%"]
+    }
+};
+
+const INVESTMENT_TYPES = {
+    CONSERVATIVE: {
+        name: "Government Bonds",
+        risk: 0.05,
+        returnRate: 0.04,
+        minAmount: 10000
+    },
+    BALANCED: {
+        name: "Corporate Bonds",
+        risk: 0.15,
+        returnRate: 0.08,
+        minAmount: 50000
+    },
+    AGGRESSIVE: {
+        name: "Stock Market",
+        risk: 0.25,
+        returnRate: 0.15,
+        minAmount: 100000
+    },
+    VENTURE: {
+        name: "Startup Investments",
+        risk: 0.40,
+        returnRate: 0.25,
+        minAmount: 500000
+    }
+};
+
+// Add to MILESTONES
+const ENHANCED_MILESTONES = {
+    SPECIALIZATION_UNLOCKED: {
+        name: "Insurance Specialist",
+        policies: 1000,
+        reward: "Unlocks specialization system"
+    },
+    INVESTMENT_UNLOCKED: {
+        name: "Capital Manager",
+        money: 1000000,
+        reward: "Unlocks investment system"
+    },
+    RESEARCH_UNLOCKED: {
+        name: "Industry Innovator",
+        policies: 5000,
+        money: 5000000,
+        reward: "Unlocks research system"
+    }
+};
+
+Object.assign(MILESTONES, ENHANCED_MILESTONES);
+
 // Export for use in other files
 window.CLAIM_CHOICES = CLAIM_CHOICES;
 window.INITIAL_STATES = INITIAL_STATES;

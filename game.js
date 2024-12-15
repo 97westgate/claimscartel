@@ -282,6 +282,25 @@ class Game {
                 this.updateAllDisplays();
             }
         }, 1000);
+
+        // Add salary and profit tracking
+        this.salary = 0;
+        this.baseSalary = 50000; // $50k base annual salary
+        this.salaryMultiplier = 1;
+        this.totalProfit = 0;
+        this.profitLastSecond = 0;
+        this.profitThisSecond = 0;
+
+        // Add new DOM elements
+        this.salaryDisplay = document.getElementById('salary');
+        this.profitDisplay = document.getElementById('profit');
+        
+        // Update salary and profit every second
+        setInterval(() => {
+            if (!this.isPaused) {
+                this.updateSalaryAndProfit();
+            }
+        }, 1000);
     }
 
     generateAutomaticPolicies() {
@@ -294,8 +313,17 @@ class Game {
 
     collectPremiums() {
         const opinionMultiplier = this.publicOpinionVisible ? (this.publicOpinion / 50) : 1;
-        const premiumsCollected = this.policies * (this.premiumRate / 1) * opinionMultiplier;
-        this.money += premiumsCollected;
+        const revenue = this.policies * (this.premiumRate / 1) * opinionMultiplier;
+        const costs = this.calculateCosts();
+        
+        // Add revenue and subtract costs
+        this.money += revenue - costs;
+        
+        // Update profit tracking
+        this.profitLastSecond = this.profitThisSecond;
+        this.profitThisSecond = revenue - costs;
+        this.totalProfit += this.profitThisSecond;
+        
         this.updateDisplay();
     }
 
@@ -370,6 +398,23 @@ class Game {
         // Update map
         if (this.map) {
             this.map.updateCoverage();
+        }
+
+        // Update salary display with trend indicator
+        if (this.salaryDisplay) {
+            const annualSalary = Math.floor(this.salary).toLocaleString();
+            this.salaryDisplay.innerHTML = `Salary: $${annualSalary}/year`;
+            if (this.salaryMultiplier > 1) {
+                this.salaryDisplay.innerHTML += ` 📈 (${(this.salaryMultiplier * 100 - 100).toFixed(0)}% bonus)`;
+            }
+        }
+
+        // Update profit display with trend
+        if (this.profitDisplay) {
+            const profitPerSec = Math.floor(this.profitThisSecond).toLocaleString();
+            const trend = this.profitThisSecond > this.profitLastSecond ? '📈' : 
+                         this.profitThisSecond < this.profitLastSecond ? '📉' : '';
+            this.profitDisplay.innerHTML = `Profit: $${profitPerSec}/sec ${trend}`;
         }
     }
 
@@ -929,10 +974,75 @@ class Game {
         `;
         this.revenueDisplay.title = breakdown;
     }
+
+    updateSalaryAndProfit() {
+        // Calculate salary based on company size and performance
+        const policiesMultiplier = Math.floor(this.policies / 1000); // Salary bump every 1000 policies
+        const revenueMultiplier = Math.floor(this.money / 1000000); // Salary bump every $1M
+        this.salaryMultiplier = 1 + (policiesMultiplier * 0.1) + (revenueMultiplier * 0.2);
+        this.salary = this.baseSalary * this.salaryMultiplier;
+
+        // Calculate profit (revenue - costs)
+        const revenue = this.calculateRevenue();
+        const costs = this.calculateCosts();
+        this.profitLastSecond = this.profitThisSecond;
+        this.profitThisSecond = revenue - costs;
+        this.totalProfit += this.profitThisSecond;
+
+        this.updateDisplay();
+    }
+
+    calculateCosts() {
+        // Employee salaries (per second)
+        const employeeCosts = Object.entries(this.upgrades).reduce((total, [key, upgrade]) => {
+            const baseSalaryPerSecond = {
+                employee: 10,      // $10/sec ($315,360/year)
+                manager: 30,       // $30/sec ($946,080/year)
+                executive: 100,    // $100/sec ($3.15M/year)
+                network: 300,      // $300/sec ($9.46M/year)
+                merger: 1000       // $1000/sec ($31.5M/year)
+            }[key] || 10;
+
+            return total + (upgrade.count * baseSalaryPerSecond);
+        }, 0);
+
+        // Operating costs (scales with number of policies)
+        const operatingCosts = this.policies * 0.1; // $0.1 per policy per second
+
+        // Your salary (converted to per second)
+        const yourSalary = this.salary / (365 * 24 * 60 * 60);
+
+        // Market expansion costs (higher costs for bigger markets)
+        const marketCosts = {
+            local: 0,
+            state: 100,
+            regional: 500,
+            national: 2000,
+            international: 10000
+        }[this.currentMarket] || 0;
+
+        // Claims payouts (average cost per policy)
+        const claimsCosts = this.policies * 0.5; // $0.5 per policy per second for claims
+
+        const totalCosts = employeeCosts + operatingCosts + yourSalary + marketCosts + claimsCosts;
+
+        // Show cost breakdown in tooltip when hovering over profit
+        if (this.profitDisplay) {
+            this.profitDisplay.title = `
+                Costs Breakdown (per second):
+                Employee Salaries: $${Math.floor(employeeCosts).toLocaleString()}
+                Operating Costs: $${Math.floor(operatingCosts).toLocaleString()}
+                Your Salary: $${Math.floor(yourSalary).toLocaleString()}
+                Market Costs: $${Math.floor(marketCosts).toLocaleString()}
+                Claims Payouts: $${Math.floor(claimsCosts).toLocaleString()}
+                Total: $${Math.floor(totalCosts).toLocaleString()}
+            `;
+        }
+
+        return totalCosts;
+    }
 }
 
-// Start the game when the page loads
 window.onload = () => {
-    // You can now start with different initial states
-    const game = new Game('NEW_GAME');  // or 'LATE_GAME', 'RICH', etc.
+    const game = new EnhancedGame('NEW_GAME');
 };

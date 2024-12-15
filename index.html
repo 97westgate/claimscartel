@@ -8,28 +8,68 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body>
-    <h1>Coverage Cartel</h1>
-    
-    <div class="stats">
-        <div>Policies: <span id="policies">0</span></div>
-        <div>Money: $<span id="money">0</span></div>
-        <div id="revenue">Revenue: $0/sec</div>
-        <div id="public-opinion" style="display: none;">
-            Public Opinion: <span id="opinion-value">50</span>% 
-            <span id="opinion-trend">😐</span>
-        </div>
+    <div>Policies: <span id="policies">0</span></div>
+    <div>Money: $<span id="money">0</span></div>
+    <div id="revenue">Revenue: $0/sec</div>
+    <div id="profit">Profit: $0/sec</div>
+    <div id="salary">Salary: $50,000/year</div>
+    <div id="public-opinion" style="display: none;">
+        Public Opinion: <span id="opinion-value">50</span>% 
+        <span id="opinion-trend">😐</span>
     </div>
 
-    <div id="map-container" class="map-panel">
-        <h2>🗺️ Market Expansion</h2>
-    </div>
-
-    <div id="upgrades">
+    <!-- Employee Section -->
+    <div id="upgrades" style="display: none;">
+        <h2>Staff Management 👥</h2>
         <div class="upgrade-item">
             <span class="upgrade-label">Hire Employee (<span id="employee-cost">$1,000</span>)</span>
             <button id="employee-button" class="emoji-button">👨‍💼</button>
             <span id="employee-count">Owned: 0</span>
         </div>
+    </div>
+
+    <!-- Rest of the content... -->
+
+    <div id="advanced-systems" class="game-section" style="display: none;">
+        <!-- Market Overview -->
+        <div class="market-panel">
+            <h3>Market Conditions 📊</h3>
+            <div id="market-indicators">
+                <div class="indicator">
+                    <span>Economy:</span>
+                    <div class="progress-bar" id="economy-indicator"></div>
+                </div>
+                <div class="indicator">
+                    <span>Competition:</span>
+                    <div class="progress-bar" id="competition-indicator"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specializations -->
+        <div class="specialization-panel">
+            <h3>Insurance Divisions 🏢</h3>
+            <div id="specializations">
+                <div class="spec-card" id="health-spec">
+                    <h4>Health Insurance</h4>
+                    <div class="spec-stats"></div>
+                    <button class="upgrade-btn">Upgrade</button>
+                </div>
+                <!-- Similar cards for Life and Property -->
+            </div>
+        </div>
+
+        <!-- Investment Portfolio -->
+        <div class="investment-panel">
+            <h3>Investments 💰</h3>
+            <div id="investment-options">
+                <!-- Investment options will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="map-container" class="map-panel">
+        <h2>🗺️ Market Expansion</h2>
     </div>
 
     <div id="claims-queue">
@@ -69,6 +109,7 @@
     <script src="events.js"></script>
     <script src="map.js"></script>
     <script src="game.js"></script>
+    <script src="enhanced-game.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
 </body>
