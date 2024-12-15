@@ -52,18 +52,18 @@ const INITIAL_STATES = {
 };
 
 const MILESTONES = {
+    FIRST_NETWORK: {
+        name: "Provider Network",
+        policies: 10,
+        description: "Build your first network of healthcare providers.",
+        reward: "The work itself is reward enough"
+    },
     STARTUP_FUNDING: {
         name: "HMO Act Funding",
-        policies: 10,
+        policies: 25,
         money: 1000,
         description: "Secure federal funding under the HMO Act of 1973.",
         reward: "Employees available"
-    },
-    FIRST_NETWORK: {
-        name: "Provider Network",
-        policies: 25,
-        description: "Build your first network of healthcare providers.",
-        reward: "Claims system unlocked"
     },
     PREPAID_PIONEER: {
         name: "Prepaid Care Pioneer",
