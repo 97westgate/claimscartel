@@ -39,7 +39,7 @@ class Game {
             }
         };
 
-        // Get DOM elements
+        // Get DOM elements with null checks
         this.policiesDisplay = document.getElementById('policies');
         this.moneyDisplay = document.getElementById('money');
         this.revenueDisplay = document.getElementById('revenue');
@@ -47,6 +47,16 @@ class Game {
         this.publicOpinionDisplay = document.getElementById('public-opinion');
         this.opinionValueDisplay = document.getElementById('opinion-value');
         this.opinionTrendDisplay = document.getElementById('opinion-trend');
+
+        // Verify all required elements exist
+        if (!this.policiesDisplay || !this.moneyDisplay || !this.revenueDisplay) {
+            console.error('Required game display elements not found!');
+        }
+
+        // Add verification for opinion-related elements
+        if (!this.publicOpinionDisplay || !this.opinionValueDisplay || !this.opinionTrendDisplay) {
+            console.warn('Public opinion display elements not found');
+        }
 
         // Remove both audio elements reference since we'll create them dynamically
         this.clickSoundTemplate = document.getElementById('clickSound');
@@ -201,10 +211,16 @@ class Game {
     }
 
     updateDisplay() {
-        // Update basic stats
-        this.policiesDisplay.textContent = Math.floor(this.policies);
-        this.moneyDisplay.textContent = Math.floor(this.money).toLocaleString();
-        this.revenueDisplay.textContent = `Revenue: $${Math.floor(this.policies * this.premiumRate)}/sec`;
+        // Update basic stats with null checks
+        if (this.policiesDisplay) {
+            this.policiesDisplay.textContent = Math.floor(this.policies);
+        }
+        if (this.moneyDisplay) {
+            this.moneyDisplay.textContent = Math.floor(this.money).toLocaleString();
+        }
+        if (this.revenueDisplay) {
+            this.revenueDisplay.textContent = `Revenue: $${Math.floor(this.policies * this.premiumRate)}/sec`;
+        }
 
         // Update employee upgrade visibility based on milestone instead of policy count
         const employee = this.upgrades.employee;
@@ -220,8 +236,8 @@ class Game {
             }
         }
 
-        // Update public opinion display if visible
-        if (this.publicOpinionVisible) {
+        // Update public opinion display if visible and elements exist
+        if (this.publicOpinionVisible && this.opinionValueDisplay && this.opinionTrendDisplay) {
             this.opinionValueDisplay.textContent = Math.round(this.publicOpinion);
             
             // Update trend emoji based on score
@@ -234,8 +250,10 @@ class Game {
             this.opinionTrendDisplay.textContent = trendEmoji;
         }
 
-        // Update map (moved to root level)
-        this.map.updateCoverage();
+        // Update map
+        if (this.map) {
+            this.map.updateCoverage();
+        }
     }
 
     showEventMessage(message) {
@@ -354,7 +372,11 @@ class Game {
     updatePublicOpinion(change) {
         if (!this.publicOpinionVisible) {
             this.publicOpinionVisible = true;
-            this.publicOpinionDisplay.style.display = 'block';
+            if (this.publicOpinionDisplay) {
+                this.publicOpinionDisplay.style.display = 'block';
+            } else {
+                console.warn('Public opinion display element not found');
+            }
             this.showEventMessage("📰 Public Opinion now affects your business!");
         }
 
