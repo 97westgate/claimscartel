@@ -12,6 +12,19 @@ class Game {
         this.lastPolicyCount = 0;
         this.policiesPerSecond = 0;
 
+        // Add milestone tracking
+        this.completedMilestones = new Set();
+        this.milestonesElement = document.getElementById('milestones-list');
+        
+        // Initialize milestones display immediately
+        this.updateMilestonesDisplay();
+        
+        // Update milestones display every second
+        setInterval(() => {
+            this.checkMilestones();
+            this.updateMilestonesDisplay();
+        }, 1000);
+
         // Upgrade definitions
         this.upgrades = {
             employee: { 
@@ -46,7 +59,10 @@ class Game {
         this.employeeCost = document.getElementById('employee-cost');
         this.employeeCount = document.getElementById('employee-count');
 
-        // Hide upgrades initially
+        // Initialize map first
+        this.map = new InsuranceMap(this);
+
+        // Hide upgrades initially (moved after map initialization)
         document.querySelectorAll('.upgrade-item').forEach(item => item.style.display = 'none');
 
         // Add click handlers
@@ -122,19 +138,9 @@ class Game {
         this.opinionValueDisplay = document.getElementById('opinion-value');
         this.opinionTrendDisplay = document.getElementById('opinion-trend');
 
-        // Add milestone tracking
-        this.completedMilestones = new Set();
-        this.milestonesElement = document.getElementById('milestones-list');
-        
-        // Update milestones display every second
-        setInterval(() => this.checkMilestones(), 1000);
-
         // Add title reference
         this.titleElement = document.querySelector('h1');
         this.currentTitle = "Small Insurance Business"; // Default title
-
-        // Initialize map
-        this.map = new InsuranceMap(this);
     }
 
     generateAutomaticPolicies() {
@@ -200,12 +206,12 @@ class Game {
         this.moneyDisplay.textContent = Math.floor(this.money).toLocaleString();
         this.revenueDisplay.textContent = `Revenue: $${Math.floor(this.policies * this.premiumRate)}/sec`;
 
-        // Update employee upgrade
+        // Update employee upgrade visibility based on milestone instead of policy count
         const employee = this.upgrades.employee;
         const employeeDiv = document.querySelector('.upgrade-item:nth-child(1)');
-        employeeDiv.style.display = this.policies >= employee.visibleAtPolicies ? 'grid' : 'none';
-            
-        if (this.policies >= employee.visibleAtPolicies) {
+        employeeDiv.style.display = this.completedMilestones.has('STARTUP_FUNDING') ? 'grid' : 'none';
+        
+        if (this.completedMilestones.has('STARTUP_FUNDING')) {
             this.employeeButton.disabled = this.money < employee.cost;
             this.employeeCost.textContent = `$${employee.cost.toLocaleString()}`;
             this.employeeCount.textContent = employee.emoji.repeat(employee.count);
@@ -227,6 +233,9 @@ class Game {
             
             this.opinionTrendDisplay.textContent = trendEmoji;
         }
+
+        // Update map (moved to root level)
+        this.map.updateCoverage();
     }
 
     showEventMessage(message) {

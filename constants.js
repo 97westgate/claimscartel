@@ -57,7 +57,7 @@ const MILESTONES = {
         policies: 10,
         money: 1000,
         description: "Secure federal funding under the HMO Act of 1973.",
-        reward: "Initial capital secured"
+        reward: "Employees available"
     },
     FIRST_NETWORK: {
         name: "Provider Network",
