@@ -138,3 +138,4 @@ a) area increases per policy
 b) animation when policy increases
 c) previously covered area should still be covered
 d) fun shape
+e) coverage doesnt overlap
