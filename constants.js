@@ -147,6 +147,44 @@ const MILESTONES = {
     }
 };
 
+// Add new milestones that unlock features
+const PROGRESSION_MILESTONES = {
+    // Early Game (0-1000 policies)
+    STARTUP: {
+        name: "Insurance Startup",
+        policies: 25,
+        reward: "Unlock basic employees"
+    },
+    
+    // Growth Phase (1000-10000 policies)
+    REGIONAL_EXPANSION: {
+        name: "Regional Player",
+        policies: 1000,
+        reward: "Unlock managers and premium policies"
+    },
+    
+    // Corporate Phase (10000-100000 policies)
+    CORPORATE_PRESENCE: {
+        name: "Corporate Entity",
+        policies: 10000,
+        reward: "Unlock executives and corporate plans"
+    },
+    
+    // Market Domination (100000+ policies)
+    MARKET_LEADER: {
+        name: "Market Leader",
+        policies: 100000,
+        reward: "Unlock mergers and government contracts"
+    },
+    
+    // End Game
+    INSURANCE_TITAN: {
+        name: "Insurance Titan",
+        policies: 1000000,
+        money: 90000000000,
+        reward: "Victory!"
+    }
+};
 
 // Track achievements
 const ACHIEVEMENTS = {

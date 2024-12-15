@@ -35,9 +35,128 @@ class Game {
                 name: "Hire Employee",
                 emoji: "👨‍💼",
                 policiesPerSecond: 0.1,
-                visibleAtPolicies: 5
+                unlocksAt: 25,
+                description: "Hire staff to sell policies automatically"
+            },
+            manager: {
+                cost: 100000,
+                multiplier: 2.5,
+                count: 0,
+                baseCost: 100000,
+                name: "Regional Manager",
+                emoji: "👔",
+                policiesPerSecond: 1.0,
+                unlocksAt: 1000,
+                description: "Oversees policy growth in a region"
+            },
+            executive: {
+                cost: 1000000,
+                multiplier: 5,
+                count: 0,
+                baseCost: 1000000,
+                name: "Executive",
+                emoji: "💼",
+                policiesPerSecond: 10,
+                unlocksAt: 10000,
+                description: "Implements aggressive growth strategies"
+            },
+            network: {
+                cost: 10000000,
+                multiplier: 10,
+                count: 0,
+                baseCost: 10000000,
+                name: "Provider Network",
+                emoji: "🏥",
+                policiesPerSecond: 50,
+                unlocksAt: 50000,
+                description: "Establish exclusive provider networks"
+            },
+            merger: {
+                cost: 100000000,
+                multiplier: 25,
+                count: 0,
+                baseCost: 100000000,
+                name: "Corporate Merger",
+                emoji: "🤝",
+                policiesPerSecond: 250,
+                unlocksAt: 100000,
+                description: "Acquire smaller insurance companies"
             }
         };
+
+        // Policy Types (unlocked through milestones)
+        this.policyTypes = {
+            basic: {
+                name: "Basic Coverage",
+                premiumRate: 10,
+                unlocksAt: 0
+            },
+            premium: {
+                name: "Premium Plan",
+                premiumRate: 25,
+                unlocksAt: 1000,
+                description: "Higher premiums, better coverage"
+            },
+            corporate: {
+                name: "Corporate Plan",
+                premiumRate: 100,
+                unlocksAt: 10000,
+                description: "Bulk employee coverage contracts"
+            },
+            government: {
+                name: "Government Contract",
+                premiumRate: 500,
+                unlocksAt: 100000,
+                description: "Lucrative government partnerships"
+            }
+        };
+
+        // Market Expansion System
+        this.markets = {
+            local: {
+                name: "Local Market",
+                multiplier: 1,
+                unlocksAt: 0
+            },
+            state: {
+                name: "State-wide",
+                multiplier: 2,
+                unlocksAt: 5000,
+                cost: 1000000
+            },
+            regional: {
+                name: "Multi-state Region",
+                multiplier: 5,
+                unlocksAt: 20000,
+                cost: 10000000
+            },
+            national: {
+                name: "National Coverage",
+                multiplier: 10,
+                unlocksAt: 100000,
+                cost: 100000000
+            },
+            international: {
+                name: "Global Operations",
+                multiplier: 25,
+                unlocksAt: 500000,
+                cost: 1000000000
+            }
+        };
+
+        // Revenue Multipliers
+        this.revenueMultipliers = {
+            baseRate: 1,
+            marketExpansion: 1,
+            policyType: 1,
+            publicOpinion: 1,
+            efficiency: 1
+        };
+
+        // Initialize systems
+        this.currentMarket = 'local';
+        this.currentPolicyType = 'basic';
+        this.efficiencyLevel = 1;
 
         // Get DOM elements with null checks
         this.policiesDisplay = document.getElementById('policies');
@@ -151,6 +270,18 @@ class Game {
         // Add title reference
         this.titleElement = document.querySelector('h1');
         this.currentTitle = "Small Insurance Business"; // Default title
+
+        // Initialize UI for new systems
+        this.initializeUpgradeUI();
+        this.initializeMarketUI();
+        this.initializePolicyUI();
+        
+        // Update all displays every second
+        setInterval(() => {
+            if (!this.isPaused) {
+                this.updateAllDisplays();
+            }
+        }, 1000);
     }
 
     generateAutomaticPolicies() {
@@ -220,20 +351,6 @@ class Game {
         }
         if (this.revenueDisplay) {
             this.revenueDisplay.textContent = `Revenue: $${Math.floor(this.policies * this.premiumRate)}/sec`;
-        }
-
-        // Update employee upgrade visibility based on milestone instead of policy count
-        const employee = this.upgrades.employee;
-        const employeeDiv = document.querySelector('.upgrade-item:nth-child(1)');
-        employeeDiv.style.display = this.completedMilestones.has('STARTUP_FUNDING') ? 'grid' : 'none';
-        
-        if (this.completedMilestones.has('STARTUP_FUNDING')) {
-            this.employeeButton.disabled = this.money < employee.cost;
-            this.employeeCost.textContent = `$${employee.cost.toLocaleString()}`;
-            this.employeeCount.textContent = employee.emoji.repeat(employee.count);
-            if (employee.count > 0) {
-                this.employeeCount.textContent += ` (${(employee.count * employee.policiesPerSecond).toFixed(1)} policies/sec)`;
-            }
         }
 
         // Update public opinion display if visible and elements exist
@@ -534,10 +651,209 @@ class Game {
 
         return parts.join('');
     }
+
+    // Calculate total revenue per second
+    calculateRevenue() {
+        const baseRevenue = this.policies * this.policyTypes[this.currentPolicyType].premiumRate;
+        const marketMultiplier = this.markets[this.currentMarket].multiplier;
+        const efficiencyMultiplier = this.efficiencyLevel;
+        const opinionMultiplier = this.publicOpinionVisible ? (this.publicOpinion / 50) : 1;
+
+        return baseRevenue * marketMultiplier * efficiencyMultiplier * opinionMultiplier;
+    }
+
+    // Upgrade market presence
+    upgradeMarket(marketKey) {
+        const market = this.markets[marketKey];
+        if (this.money >= market.cost && this.policies >= market.unlocksAt) {
+            this.money -= market.cost;
+            this.currentMarket = marketKey;
+            this.revenueMultipliers.marketExpansion = market.multiplier;
+            this.showEventMessage(`🌎 Expanded to ${market.name}!`);
+            this.updateDisplay();
+        }
+    }
+
+    // Upgrade policy type
+    upgradePolicyType(policyKey) {
+        const policy = this.policyTypes[policyKey];
+        if (this.policies >= policy.unlocksAt) {
+            this.currentPolicyType = policyKey;
+            this.revenueMultipliers.policyType = policy.premiumRate / 10;
+            this.showEventMessage(`📋 Upgraded to ${policy.name}!`);
+            this.updateDisplay();
+        }
+    }
+
+    initializeUpgradeUI() {
+        const upgradesContainer = document.getElementById('upgrades');
+        upgradesContainer.innerHTML = ''; // Clear existing content
+        
+        Object.entries(this.upgrades).forEach(([key, upgrade]) => {
+            const div = document.createElement('div');
+            div.className = 'upgrade-item';
+            div.innerHTML = `
+                <span class="upgrade-label">${upgrade.name} ($<span id="${key}-cost">${upgrade.cost.toLocaleString()}</span>)</span>
+                <button id="${key}-button" class="emoji-button">${upgrade.emoji}</button>
+                <span id="${key}-count" class="upgrade-count"></span>
+                <div class="upgrade-description">${upgrade.description || ''}</div>
+            `;
+            upgradesContainer.appendChild(div);
+
+            // Add click handler
+            document.getElementById(`${key}-button`).addEventListener('click', () => {
+                this.purchaseUpgrade(key);
+            });
+        });
+    }
+
+    initializeMarketUI() {
+        const marketContainer = document.getElementById('market-options');
+        Object.entries(this.markets).forEach(([key, market]) => {
+            const div = document.createElement('div');
+            div.className = 'upgrade-option';
+            div.innerHTML = `
+                <div>
+                    <strong>${market.name}</strong>
+                    <div>×${market.multiplier} revenue multiplier</div>
+                    ${market.cost ? `<div>Cost: $${market.cost.toLocaleString()}</div>` : ''}
+                </div>
+                <button class="market-button" data-market="${key}">Expand</button>
+            `;
+            marketContainer.appendChild(div);
+
+            const button = div.querySelector('button');
+            button.addEventListener('click', () => this.upgradeMarket(key));
+        });
+    }
+
+    initializePolicyUI() {
+        const policyContainer = document.getElementById('policy-options');
+        Object.entries(this.policyTypes).forEach(([key, policy]) => {
+            const div = document.createElement('div');
+            div.className = 'upgrade-option';
+            div.innerHTML = `
+                <div>
+                    <strong>${policy.name}</strong>
+                    <div>$${policy.premiumRate}/policy/sec</div>
+                    ${policy.description ? `<div>${policy.description}</div>` : ''}
+                </div>
+                <button class="policy-button" data-policy="${key}">Switch</button>
+            `;
+            policyContainer.appendChild(div);
+
+            const button = div.querySelector('button');
+            button.addEventListener('click', () => this.upgradePolicyType(key));
+        });
+    }
+
+    updateAllDisplays() {
+        this.updateDisplay(); // Existing display updates
+        this.updateUpgradeDisplay();
+        this.updateMarketDisplay();
+        this.updatePolicyDisplay();
+        this.updateRevenue();
+    }
+
+    updateUpgradeDisplay() {
+        Object.entries(this.upgrades).forEach(([key, upgrade]) => {
+            const countElement = document.getElementById(`${key}-count`);
+            const buttonElement = document.getElementById(`${key}-button`);
+            const costElement = document.getElementById(`${key}-cost`);
+            const container = buttonElement.closest('.upgrade-item');
+
+            // Show/hide based on unlock requirements
+            const isUnlocked = this.policies >= (upgrade.unlocksAt || 0);
+            
+            if (isUnlocked) {
+                container.style.display = 'grid';
+                
+                // Update count and production
+                if (upgrade.count > 0) {
+                    countElement.textContent = `${upgrade.emoji.repeat(Math.min(upgrade.count, 5))} (${(upgrade.count * upgrade.policiesPerSecond).toFixed(1)}/sec)`;
+                } else {
+                    countElement.textContent = '';
+                }
+
+                // Update cost and availability
+                costElement.textContent = upgrade.cost.toLocaleString();
+                buttonElement.disabled = this.money < upgrade.cost;
+            } else {
+                container.style.display = 'none';
+            }
+        });
+    }
+
+    updateMarketDisplay() {
+        const marketButtons = document.querySelectorAll('.market-button');
+        marketButtons.forEach(button => {
+            const marketKey = button.dataset.market;
+            const market = this.markets[marketKey];
+            const container = button.closest('.upgrade-option');
+
+            // Show/hide based on unlock requirements
+            if (this.policies >= market.unlocksAt) {
+                container.classList.remove('locked');
+                button.disabled = this.money < (market.cost || 0);
+                
+                // Highlight current market
+                if (this.currentMarket === marketKey) {
+                    container.classList.add('active');
+                    button.textContent = 'Active';
+                } else {
+                    container.classList.remove('active');
+                    button.textContent = 'Expand';
+                }
+            } else {
+                container.classList.add('locked');
+                button.disabled = true;
+            }
+        });
+    }
+
+    updatePolicyDisplay() {
+        const policyButtons = document.querySelectorAll('.policy-button');
+        policyButtons.forEach(button => {
+            const policyKey = button.dataset.policy;
+            const policy = this.policyTypes[policyKey];
+            const container = button.closest('.upgrade-option');
+
+            // Show/hide based on unlock requirements
+            if (this.policies >= policy.unlocksAt) {
+                container.classList.remove('locked');
+                
+                // Highlight current policy
+                if (this.currentPolicyType === policyKey) {
+                    container.classList.add('active');
+                    button.textContent = 'Active';
+                } else {
+                    container.classList.remove('active');
+                    button.textContent = 'Switch';
+                }
+            } else {
+                container.classList.add('locked');
+                button.disabled = true;
+            }
+        });
+    }
+
+    updateRevenue() {
+        const revenue = this.calculateRevenue();
+        this.revenueDisplay.textContent = `Revenue: $${Math.floor(revenue).toLocaleString()}/sec`;
+        
+        // Add revenue breakdown tooltip
+        const breakdown = `
+            Base: $${Math.floor(this.policies * this.policyTypes[this.currentPolicyType].premiumRate).toLocaleString()}
+            Market: ×${this.markets[this.currentMarket].multiplier}
+            Efficiency: ×${this.efficiencyLevel}
+            Opinion: ×${(this.publicOpinionVisible ? this.publicOpinion / 50 : 1).toFixed(2)}
+        `;
+        this.revenueDisplay.title = breakdown;
+    }
 }
 
 // Start the game when the page loads
 window.onload = () => {
     // You can now start with different initial states
-    const game = new Game('NEW_GAME');  // or 'LATE_GAME', 'RICH', etc.
+    const game = new Game('NATIONAL');  // or 'LATE_GAME', 'RICH', etc.
 };
