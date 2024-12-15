@@ -14,6 +14,12 @@ const MINNESOTA_MAP = {
     }
 };
 
+const MAP_CONFIG = {
+    tileLayer: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    geoJsonUrl: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/USA/MN.geo.json',
+    zoom: 13
+};
+
 class InsuranceMap {
     constructor(game) {
         this.game = game;
@@ -54,53 +60,73 @@ class InsuranceMap {
     updateCoverage() {
         if (!this.map || !this.coverageArea) return;
         
-        if (Math.floor(this.game.policies) > Math.floor(this.lastPolicies)) {
-            // Set new target radiuses
-            for (let i = 0; i < 5; i++) {
-                const angle = Math.floor(Math.random() * 360);
-                const growth = Math.random() * 30 + 15;
-                
-                for (let offset = -30; offset <= 30; offset++) {
-                    const idx = (angle + offset + 360) % 360;
-                    const falloff = Math.cos((offset / 30) * (Math.PI / 2));
-                    this.targetRadius[idx] = this.maxRadius[idx] + growth * falloff;
-                }
-            }
-
-            // Animate to new targets
-            let progress = 0;
-            const animate = () => {
-                progress += 0.1;
-                
-                // Interpolate between old and new radiuses
-                for (let i = 0; i < 360; i++) {
-                    const diff = this.targetRadius[i] - this.maxRadius[i];
-                    this.maxRadius[i] += diff * 0.1;
-                }
-
-                const path = this.generatePath(this.maxRadius);
-                this.coverageArea.setAttribute('d', path);
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                }
-            };
-            
-            requestAnimationFrame(animate);
-            
-            this.colorIntensity = Math.min(0.3, this.colorIntensity + 0.1);
-            this.coverageArea.style.fillOpacity = this.colorIntensity;
-            
-            setTimeout(() => {
-                this.colorIntensity = Math.max(0.1, this.colorIntensity - 0.05);
-                this.coverageArea.style.fillOpacity = this.colorIntensity;
-            }, 300);
+        const newPolicies = Math.floor(this.game.policies);
+        const oldPolicies = Math.floor(this.lastPolicies);
+        
+        if (newPolicies > oldPolicies) {
+            this.updateTargetRadiuses();
+            this.animateCoverage();
+            this.updateColorIntensity();
         }
         
         this.lastPolicies = this.game.policies;
     }
 
+    updateTargetRadiuses() {
+        const growthPoints = 3;
+        const angleSpread = 30;
+        
+        for (let i = 0; i < growthPoints; i++) {
+            const angle = Math.floor(Math.random() * 360);
+            const growth = Math.random() * 10 + 5;
+            
+            for (let offset = -angleSpread; offset <= angleSpread; offset++) {
+                const idx = (angle + offset + 360) % 360;
+                const falloff = Math.cos((offset / angleSpread) * (Math.PI / 2));
+                this.targetRadius[idx] = this.maxRadius[idx] + growth * falloff;
+            }
+        }
+    }
+
+    animateCoverage() {
+        const animate = () => {
+            let stillAnimating = false;
+            
+            for (let i = 0; i < 360; i++) {
+                const diff = this.targetRadius[i] - this.maxRadius[i];
+                if (Math.abs(diff) > 0.1) {
+                    this.maxRadius[i] += diff * 0.1;
+                    stillAnimating = true;
+                }
+            }
+
+            this.coverageArea.setAttribute('d', this.generatePath(this.maxRadius));
+
+            if (stillAnimating) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        requestAnimationFrame(animate);
+    }
+
+    updateColorIntensity() {
+        this.colorIntensity = Math.min(0.3, this.colorIntensity + 0.1);
+        this.coverageArea.style.fillOpacity = this.colorIntensity;
+        
+        setTimeout(() => {
+            this.colorIntensity = Math.max(0.1, this.colorIntensity - 0.05);
+            this.coverageArea.style.fillOpacity = this.colorIntensity;
+        }, 300);
+    }
+
     setupDisplay() {
+        this.createMapContainer();
+        this.initializeMap();
+        this.loadStateData();
+    }
+
+    createMapContainer() {
         const mapPanel = document.getElementById('map-container');
         mapPanel.innerHTML = `
             <h2>🗺️ Starting at ${MINNESOTA_MAP.startingHospital.name}</h2>
@@ -108,18 +134,30 @@ class InsuranceMap {
                 <div id="minnesota-map"></div>
             </div>
         `;
+    }
 
+    initializeMap() {
         this.map = L.map('minnesota-map', {
             scrollWheelZoom: false,
             doubleClickZoom: false,
             dragging: false,
             zoomControl: false
-        }).setView(MINNESOTA_MAP.startingHospital.coords, 13);
+        }).setView(MINNESOTA_MAP.startingHospital.coords, MAP_CONFIG.zoom);
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer(MAP_CONFIG.tileLayer, {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(this.map);
 
+        // Initialize SVG layer
+        const svg = L.svg().addTo(this.map);
+        const coverageGroup = L.SVG.create('g');
+        this.coverageArea = L.SVG.create('path');
+        this.coverageArea.setAttribute('class', 'coverage-area');
+        coverageGroup.appendChild(this.coverageArea);
+        svg._rootGroup.appendChild(coverageGroup);
+    }
+
+    loadStateData() {
         fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries/USA/MN.geo.json')
             .then(response => response.json())
             .then(data => {
@@ -152,13 +190,6 @@ class InsuranceMap {
                     }
                 });
             });
-
-        const svg = L.svg().addTo(this.map);
-        const coverageGroup = L.SVG.create('g');
-        this.coverageArea = L.SVG.create('path');
-        this.coverageArea.setAttribute('class', 'coverage-area');
-        coverageGroup.appendChild(this.coverageArea);
-        svg._rootGroup.appendChild(coverageGroup);
     }
 }
 

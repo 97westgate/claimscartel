@@ -9,41 +9,72 @@ const CLAIM_CHOICES = {
     DEPOSE_STAFF: "👨‍⚖️ Depose Medical Staff"
 };
 
-// Define initial states for testing
+// Define initial states for testing based on milestone progression
 const INITIAL_STATES = {
     NEW_GAME: {
         policies: 0,
         money: 0,
-        employees: 0
+        employees: 0,
+        premiumRate: 5
     },
-    CLAIMS_START: {
+    FUNDED: {
+        policies: 5,
+        money: 1000,
+        employees: 1,
+        premiumRate: 5
+    },
+    NETWORK_ESTABLISHED: {
         policies: 10,
         money: 5000,
-        employees: 5
+        employees: 3,
+        premiumRate: 8
     },
-    LATE_GAME: {
+    REGIONAL: {
+        policies: 50,
+        money: 25000,
+        employees: 8
+    },
+    CORPORATE: {
         policies: 100,
         money: 50000,
-        employees: 20
-    },
-    RICH: {
-        policies: 50,
-        money: 1000000,
         employees: 10
+    },
+    NATIONAL: {
+        policies: 1000,
+        money: 1000000,
+        employees: 25
+    },
+    ENDGAME: {
+        policies: 50000,
+        money: 500000000,
+        employees: 100
     }
 };
 
 const MILESTONES = {
-    SMALL_BUSINESS: {
-        name: "Small Insurance Business",
+    STARTUP_FUNDING: {
+        name: "HMO Act Funding",
+        policies: 5,
+        money: 1000,
+        description: "Secure federal funding under the HMO Act of 1973.",
+        reward: "Initial capital secured"
+    },
+    FIRST_NETWORK: {
+        name: "Provider Network",
         policies: 10,
-        description: "Handle your first claims.",
+        description: "Build your first network of healthcare providers.",
         reward: "Claims system unlocked"
     },
+    PREPAID_PIONEER: {
+        name: "Prepaid Care Pioneer",
+        policies: 25,
+        description: "Establish a working prepaid care model.",
+        reward: "Premium rate +20%"
+    },
     REGIONAL_PLAYER: {
-        name: "Regional Player",
+        name: "Minnesota Coverage",
         policies: 50,
-        description: "Expand your influence into neighboring states.",
+        description: "Expand coverage across Minnesota.",
         reward: "Public opinion system unlocked"
     },
     CORPORATE_POWER: {

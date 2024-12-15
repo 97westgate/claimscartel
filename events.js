@@ -157,3 +157,83 @@ GAME_EVENTS.push(...CLAIMS_EVENTS);
 
 // Add this to the window object so it's globally available
 window.GAME_EVENTS = GAME_EVENTS; 
+
+// Add early-game events to reflect historical context
+const EARLY_EVENTS = [
+    {
+        name: "HMO Act Opportunity",
+        emoji: "📜",
+        description: "The HMO Act of 1973 provides funding for new prepaid healthcare organizations. Apply for federal support?",
+        minPolicies: 0,
+        maxPolicies: 10,  // Only show very early
+        choices: [
+            {
+                text: "Apply for Funding",
+                effect: function(game) {
+                    game.money += 1000;
+                    game.showEventMessage("Received $1,000 in federal HMO Act funding! 💰");
+                }
+            },
+            {
+                text: "Remain Independent",
+                effect: function(game) {
+                    game.premiumRate *= 1.2;
+                    game.showEventMessage("Maintaining independence. Premium rates increased! 📈");
+                }
+            }
+        ]
+    },
+    {
+        name: "Provider Partnership",
+        emoji: "🏥",
+        description: "A local hospital is interested in joining your prepaid care network.",
+        minPolicies: 3,
+        maxPolicies: 15,
+        choices: [
+            {
+                text: "Partner ($500)",
+                effect: function(game) {
+                    game.money -= 500;
+                    game.policiesPerSecond *= 1.2;
+                    game.showEventMessage("New provider added to network! Growth rate increased 🤝");
+                }
+            },
+            {
+                text: "Decline Partnership",
+                effect: function(game) {
+                    game.showEventMessage("Maintained selective network standards ✨");
+                }
+            }
+        ]
+    },
+    {
+        name: "Preventive Care Initiative",
+        emoji: "💉",
+        description: "Implement a preventive care program to reduce long-term costs?",
+        minPolicies: 8,
+        maxPolicies: 20,
+        choices: [
+            {
+                text: "Launch Program ($1,000)",
+                effect: function(game) {
+                    game.money -= 1000;
+                    // Reduce claim frequency (if claims system is active)
+                    if (game.claimsManager) {
+                        game.claimsManager.claimProbability *= 0.8;
+                    }
+                    game.showEventMessage("Preventive care program launched! Claim rates reduced 📊");
+                }
+            },
+            {
+                text: "Focus on Treatment",
+                effect: function(game) {
+                    game.premiumRate *= 1.1;
+                    game.showEventMessage("Maintaining traditional care model. Premiums adjusted 💰");
+                }
+            }
+        ]
+    }
+];
+
+// Add early events to main events array
+GAME_EVENTS.unshift(...EARLY_EVENTS); 
