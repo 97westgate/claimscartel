@@ -515,7 +515,7 @@
             stroke: #2a9d8f;
             stroke-width: 1;
             stroke-opacity: 0.3;
-            transition: all 0.3s ease;
+            transition: fill-opacity 0.3s ease;
         }
 
         .coverage-area.coverage-growing {
@@ -523,9 +523,18 @@
         }
 
         @keyframes coveragePulse {
-            0% { fill-opacity: 0.1; }
-            50% { fill-opacity: 0.3; }
-            100% { fill-opacity: 0.1; }
+            0% { 
+                fill-opacity: 0.1;
+                transform: scale(1);
+            }
+            50% { 
+                fill-opacity: 0.6;
+                transform: scale(1.02);
+            }
+            100% { 
+                fill-opacity: 0.2;
+                transform: scale(1);
+            }
         }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />

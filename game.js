@@ -142,6 +142,7 @@ class Game {
         const policiesGenerated = (employees.count * employees.policiesPerSecond) / 10;
         this.policies += policiesGenerated;
         this.updateDisplay();
+        this.map.updateCoverage();
     }
 
     collectPremiums() {
@@ -161,6 +162,7 @@ class Game {
         clickSound.play();
         
         this.updateDisplay();
+        this.map.updateCoverage();
     }
 
     purchaseUpgrade(upgradeKey) {

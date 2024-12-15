@@ -131,3 +131,10 @@ Funny how evil choices get over time.
 Choices are both terrible.
 
 Upgrades make animations and sounds more intense.
+
+
+# MAP
+a) area increases per policy
+b) anination when policy increases
+c) previously covered area should still be covered
+d) fun shape

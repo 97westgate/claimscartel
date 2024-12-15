@@ -20,58 +20,84 @@ class InsuranceMap {
         this.marketShare = MINNESOTA_MAP.marketShare;
         this.policies = MINNESOTA_MAP.policies;
         this.coverageArea = null;
-        this.basePoints = this.generateBasePoints(8); // Generate 8 points for the initial shape
-        this.lastRadius = 0;  // Add this to track previous radius
+        this.lastPolicies = 0;
+        this.colorIntensity = 0.1;
+        this.maxRadius = new Array(360).fill(20);
+        this.targetRadius = new Array(360).fill(20);
         
         this.setupDisplay();
-        setInterval(() => this.updateCoverage(), 100); // Update more frequently for smoother animation
     }
 
-    generateBasePoints(count) {
-        const points = [];
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2;
-            points.push({
-                angle: angle,
-                variance: Math.random() * 0.3 + 0.7 // Random variance between 0.7 and 1
-            });
-        }
-        return points;
-    }
-
-    generatePath(baseRadius) {
+    generatePath(radiusArray) {
         const center = this.map.latLngToLayerPoint(L.latLng(MINNESOTA_MAP.startingHospital.coords));
-        const points = this.basePoints.map(point => {
-            // Remove the time-based variance, only use the static variance
-            const radius = baseRadius * point.variance;
-            return [
-                center.x + Math.cos(point.angle) * radius,
-                center.y + Math.sin(point.angle) * radius
-            ];
-        });
+        const points = [];
 
-        // Create a closed path
-        return points.map((point, i) => 
-            (i === 0 ? 'M' : 'L') + point[0] + ',' + point[1]
-        ).join(' ') + 'Z';
+        for (let i = 0; i < 360; i += 5) {
+            const angle = (i * Math.PI) / 180;
+            const radius = radiusArray[i];
+            points.push([
+                center.x + Math.cos(angle) * radius,
+                center.y + Math.sin(angle) * radius
+            ]);
+        }
+
+        let path = `M ${points[0][0]},${points[0][1]}`;
+        for (let i = 1; i <= points.length; i++) {
+            const current = points[i - 1];
+            const next = points[i % points.length];
+            path += ` L ${next[0]},${next[1]}`;
+        }
+        
+        return path + 'Z';
     }
 
     updateCoverage() {
         if (!this.map || !this.coverageArea) return;
-
-        const baseRadius = 10 + (this.game.policies * 0.5);
         
-        // Only add the growing class if radius has increased
-        if (baseRadius > this.lastRadius) {
-            this.coverageArea.classList.add('coverage-growing');
+        if (Math.floor(this.game.policies) > Math.floor(this.lastPolicies)) {
+            // Set new target radiuses
+            for (let i = 0; i < 5; i++) {
+                const angle = Math.floor(Math.random() * 360);
+                const growth = Math.random() * 30 + 15;
+                
+                for (let offset = -30; offset <= 30; offset++) {
+                    const idx = (angle + offset + 360) % 360;
+                    const falloff = Math.cos((offset / 30) * (Math.PI / 2));
+                    this.targetRadius[idx] = this.maxRadius[idx] + growth * falloff;
+                }
+            }
+
+            // Animate to new targets
+            let progress = 0;
+            const animate = () => {
+                progress += 0.1;
+                
+                // Interpolate between old and new radiuses
+                for (let i = 0; i < 360; i++) {
+                    const diff = this.targetRadius[i] - this.maxRadius[i];
+                    this.maxRadius[i] += diff * 0.1;
+                }
+
+                const path = this.generatePath(this.maxRadius);
+                this.coverageArea.setAttribute('d', path);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            };
+            
+            requestAnimationFrame(animate);
+            
+            this.colorIntensity = Math.min(0.3, this.colorIntensity + 0.1);
+            this.coverageArea.style.fillOpacity = this.colorIntensity;
+            
             setTimeout(() => {
-                this.coverageArea.classList.remove('coverage-growing');
-            }, 300);  // Match this to animation duration
+                this.colorIntensity = Math.max(0.1, this.colorIntensity - 0.05);
+                this.coverageArea.style.fillOpacity = this.colorIntensity;
+            }, 300);
         }
         
-        this.lastRadius = baseRadius;
-        const path = this.generatePath(baseRadius);
-        this.coverageArea.setAttribute('d', path);
+        this.lastPolicies = this.game.policies;
     }
 
     setupDisplay() {
@@ -83,7 +109,6 @@ class InsuranceMap {
             </div>
         `;
 
-        // Initialize map centered on HCMC with zoom controls disabled
         this.map = L.map('minnesota-map', {
             scrollWheelZoom: false,
             doubleClickZoom: false,
@@ -91,7 +116,6 @@ class InsuranceMap {
             zoomControl: false
         }).setView(MINNESOTA_MAP.startingHospital.coords, 13);
         
-        // Option 2 - Mapbox's light style
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(this.map);
@@ -108,7 +132,6 @@ class InsuranceMap {
                     })
                 }).addTo(this.map);
 
-                // Add clickable HCMC marker
                 const hospitalMarker = L.marker(MINNESOTA_MAP.startingHospital.coords, {
                     icon: L.divIcon({
                         html: `<div class="hospital-marker">🏥</div>`,
@@ -116,14 +139,11 @@ class InsuranceMap {
                     })
                 }).addTo(this.map);
 
-                // Add click handler to hospital marker
                 hospitalMarker.on('click', (e) => {
                     if (!this.game.isPaused) {
-                        // Prevent both zoom and event bubbling
                         L.DomEvent.stopPropagation(e);
                         L.DomEvent.preventDefault(e);
                         
-                        // Get the hospital marker element and add animation
                         const markerElement = document.querySelector('.hospital-marker');
                         markerElement.classList.add('clicked');
                         setTimeout(() => markerElement.classList.remove('clicked'), 150);
@@ -133,7 +153,6 @@ class InsuranceMap {
                 });
             });
 
-        // After map initialization, add SVG overlay
         const svg = L.svg().addTo(this.map);
         const coverageGroup = L.SVG.create('g');
         this.coverageArea = L.SVG.create('path');
