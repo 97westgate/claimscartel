@@ -1,87 +1,59 @@
-# UnitedHealth Group Gameplay Progression
+# UnitedHealth Group Gameplay Loop
 
-## Stage 1: Foundational Phase (0–5 Minutes)
-**Focus:** Establishing the company and introducing managed care.
+## Core Loop (Every 1-2 seconds)
+**Focus:** Making each action meaningful and providing clear feedback
 
-**Gameplay Mechanics:**
-- **Policy Sales:** Click to sell individual insurance policies, generating initial revenue.
-- **Claims Management:** Approve or deny claims, impacting customer satisfaction and finances.
+1. **Policy Sales**
+- Click to sell individual policies
+- Each click should feel impactful with:
+  - Visual feedback (policy document animation)
+  - Audio feedback (satisfying "stamp" or "sign" sound)
+  - Clear progress indicators
+- Early policies are worth more to hook players
 
-**Historical Context:** Founded in 1974 as Charter Med Incorporated, UHG focused on improving healthcare efficiency.
+2. **Claims Management** 
+- Claims pop up periodically based on policy count
+- Each claim presents a meaningful choice:
+  - Approve: Costs money but improves reputation
+  - Deny: Saves money but risks reputation
+  - Investigate: Takes time but may reveal fraud
+- Claims should tell mini-stories about real people
 
-**Player Goals:**
-- Sell 500 policies.
-- Accumulate $50,000 in revenue.
+3. **Resource Management**
+- Balance three key resources:
+  - Money (from premiums)
+  - Reputation (from claim decisions)
+  - Market Share (from growth)
 
-**Unlocks:**
-- **Employee Hiring:** Automate policy sales to increase efficiency.
-- **Claims Processing System:** Streamline claims management for better customer service.
+## Progression Loop (Every 3-5 minutes)
+**Focus:** Clear milestones that unlock new mechanics
 
----
+1. **Stage 1: Local Insurance (0-5 min)**
+- Start with manual policy sales
+- Unlock first employees
+- Learn basic claims management
+- Goal: Reach 500 policies
 
-## Stage 2: Expansion and Innovation (5–10 Minutes)
-**Focus:** Scaling operations and introducing new services.
+2. **Stage 2: Regional Growth (5-10 min)**
+- Introduce provider networks
+- Add pharmacy benefits
+- Expand to new states
+- Goal: Reach $1M revenue
 
-**Gameplay Mechanics:**
-- **Provider Networks:** Build relationships with healthcare providers to offer comprehensive plans.
-- **Pharmacy Benefits:** Launch pharmacy benefit management services to diversify offerings.
+3. **Stage 3: Corporate Expansion (10-15 min)**
+- Enable company acquisitions
+- Add corporate clients
+- Implement data analytics
+- Goal: Complete 3 major acquisitions
 
-**Historical Context:** In 1988, UHG started its first pharmacy benefit management through its Diversified Pharmaceutical Services subsidiary.
+4. **Stage 4: Industry Leader (15-20 min)**
+- Go international
+- Influence legislation
+- Diversify services
+- Goal: Reach $90B revenue
 
-**Player Goals:**
-- Establish partnerships with 10 providers.
-- Introduce a pharmacy benefits program.
-- Achieve $1 million in revenue.
-
-**Unlocks:**
-- **Public Opinion System:** Manage reputation to attract more customers.
-- **Regional Expansion:** Enter new states with varying challenges and opportunities.
-
----
-
-## Stage 3: Mergers & Acquisitions (10–15 Minutes)
-**Focus:** Growing through strategic acquisitions.
-
-**Gameplay Mechanics:**
-- **Acquisitions:** Use accumulated funds to acquire smaller insurers and healthcare service companies, expanding market share.
-- **Integration:** Manage the integration of acquired companies to maximize synergies.
-
-**Historical Context:** Throughout the 1990s and 2000s, UHG expanded by acquiring companies like MetraHealth in 1995 and PacifiCare Health Systems in 2005.
-
-**Player Goals:**
-- Complete 3 major acquisitions.
-- Achieve $10 million in revenue.
-
-**Unlocks:**
-- **Corporate Branding:** Enhance brand recognition to boost customer trust.
-- **Data Analytics:** Implement systems to reduce claim costs and improve decision-making.
-
----
-
-## Stage 4: Diversification and Global Presence (15–20 Minutes)
-**Focus:** Becoming a global healthcare leader with diversified services.
-
-**Gameplay Mechanics:**
-- **Global Expansion:** Enter international markets, adapting to varying regulations and healthcare needs.
-- **Service Diversification:** Develop services like data analytics and healthcare delivery.
-
-**Historical Context:** UHG rebranded as UnitedHealth Group in 1998, organizing into entities like UnitedHealthcare and Optum, reflecting its diversified services.
-
-**Player Goals:**
-- Operate in 5 countries.
-- Reach $1 billion in revenue.
-
-**Unlocks:**
-- **Advanced Technologies:** Invest in AI and telemedicine to enhance service delivery.
-- **Global Partnerships:** Collaborate with international entities to expand reach.
-
----
-
-## Final Goal: Healthcare Titan
-**Objective:** Achieve $90 billion in revenue and cement your legacy as a global healthcare leader.
-
-**Reward:** "Victory! You have reshaped healthcare on a global scale."
-
----
-
-This progression mirrors UHG's historical development, providing players with a dynamic and educational experience as they navigate the complexities of building a healthcare empire.
+## Engagement Hooks
+- Each stage introduces new mechanics before old ones get stale
+- Clear "next unlock" always visible
+- Meaningful choices with lasting consequences
+- Visual/audio feedback gets more elaborate with progression

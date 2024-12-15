@@ -73,6 +73,19 @@ class EnhancedGame extends Game {
                 }
             }
         };
+        
+        // Initialize progression tracking
+        this.currentStage = 1;
+        this.nextMilestone = {
+            policies: 500,
+            revenue: 50000,
+            description: "Reach 500 policies to unlock employees!"
+        };
+        
+        // Early game multipliers
+        this.earlyGameMultiplier = 10; // First few clicks worth more
+        this.clickStreak = 0; // Track consecutive clicks
+        this.maxStreak = 10;
     }
     
     initializeCompetition() {
@@ -260,10 +273,40 @@ class EnhancedGame extends Game {
     handleClick() {
         if (this.isPaused) return;
         
-        this.policies++;
-        this.soundManager.playClickSound();
+        // Calculate policy and money gained with early game bonus
+        const basePolicy = 1;
+        const streakBonus = Math.min(this.clickStreak, this.maxStreak) / 10; // Up to 2x multiplier
+        const earlyGameBonus = Math.max(1, this.earlyGameMultiplier - (this.policies / 100));
+        
+        const policiesGained = basePolicy * (1 + streakBonus) * earlyGameBonus;
+        const moneyGained = policiesGained * this.getPolicyValue();
+        
+        // Visual and audio feedback
+        this.playPolicyAnimation(policiesGained);
+        this.soundManager.playPolicySound(this.clickStreak);
+        this.showFloatingNumber(`+${policiesGained.toFixed(1)} 📋`, 'policy');
+        this.showFloatingNumber(`+$${moneyGained.toFixed(0)} 💰`, 'money');
+        
+        // Update resources
+        this.policies += policiesGained;
+        this.money += moneyGained;
+        
+        // Update streak
+        this.updateClickStreak();
+        
+        // Check progression
+        this.checkProgressionMilestones();
+        
         this.updateDisplay();
-        this.map.updateCoverage();
+    }
+    
+    // Add new method for policy animation
+    playPolicyAnimation() {
+        const policyDoc = document.createElement('div');
+        policyDoc.className = 'policy-document';
+        // Add stamp/signature animation
+        // Add floating animation
+        // Remove after animation completes
     }
     
     // Better integrate claims with game mechanics
@@ -309,5 +352,74 @@ class EnhancedGame extends Game {
                 indicator.title = `${(value * 100).toFixed(1)}%`;
             }
         });
+    }
+    
+    updateClickStreak() {
+        this.clickStreak++;
+        if (this.clickStreak > 1) {
+            this.showStreakCounter(this.clickStreak);
+        }
+        
+        // Reset streak after 2 seconds of no clicks
+        clearTimeout(this.streakTimeout);
+        this.streakTimeout = setTimeout(() => {
+            this.clickStreak = 0;
+        }, 2000);
+    }
+    
+    showStreakCounter(streak) {
+        const streakDiv = document.getElementById('streak-counter') || this.createStreakCounter();
+        streakDiv.textContent = `${streak}x Combo!`;
+        streakDiv.style.fontSize = `${Math.min(20 + streak, 40)}px`;
+    }
+    
+    checkProgressionMilestones() {
+        // Early game tutorials and encouragement
+        if (this.policies === 1) {
+            this.showEventMessage("🎉 First policy sold! Each policy makes you stronger!");
+        } else if (this.policies === 10) {
+            this.showEventMessage("💼 Growing fast! Keep clicking to reach 500 policies!");
+        }
+        
+        // Show progress towards next milestone
+        const progress = (this.policies / this.nextMilestone.policies * 100).toFixed(1);
+        document.getElementById('milestone-progress').textContent = 
+            `Progress to ${this.nextMilestone.description}: ${progress}%`;
+            
+        // Major milestone reached
+        if (this.policies >= this.nextMilestone.policies) {
+            this.advanceToNextStage();
+        }
+    }
+    
+    advanceToNextStage() {
+        this.currentStage++;
+        this.soundManager.playMilestoneSound();
+        
+        // Update next milestone based on stage
+        switch(this.currentStage) {
+            case 2:
+                this.nextMilestone = {
+                    policies: 5000,
+                    revenue: 1000000,
+                    description: "Reach $1M revenue to expand regionally!"
+                };
+                this.showEventMessage("🌟 Employees unlocked! They'll help you sell policies automatically.");
+                break;
+            case 3:
+                this.nextMilestone = {
+                    policies: 50000,
+                    revenue: 10000000,
+                    description: "Reach $10M revenue to go corporate!"
+                };
+                break;
+            case 4:
+                this.nextMilestone = {
+                    policies: 500000,
+                    revenue: 90000000000,
+                    description: "Final goal: Reach $90B revenue!"
+                };
+                break;
+        }
     }
 }
