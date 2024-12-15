@@ -10,6 +10,42 @@ const HOSPITALS = {
         coords: [44.9537, -93.0900],
         city: "St. Paul",
         unlocksAt: 50
+    },
+    THIRD: {
+        name: "North Memorial Medical Center",
+        coords: [45.0294, -93.3270],
+        city: "Robbinsdale",
+        unlocksAt: 150
+    },
+    FOURTH: {
+        name: "United Hospital",
+        coords: [44.9397, -93.1027],
+        city: "St. Paul",
+        unlocksAt: 300
+    },
+    FIFTH: {
+        name: "St. Cloud Hospital",
+        coords: [45.5579, -94.1632],
+        city: "St. Cloud",
+        unlocksAt: 500
+    },
+    SIXTH: {
+        name: "Mayo Clinic",
+        coords: [44.0225, -92.4666],
+        city: "Rochester",
+        unlocksAt: 1000
+    },
+    SEVENTH: {
+        name: "Essentia Health-St. Mary's",
+        coords: [46.7867, -92.1005],
+        city: "Duluth",
+        unlocksAt: 2000
+    },
+    EIGHTH: {
+        name: "Regions Hospital",
+        coords: [44.9563, -93.0932],
+        city: "St. Paul",
+        unlocksAt: 5000
     }
 };
 
@@ -29,7 +65,9 @@ const MAP_CONFIG = {
     geoJsonUrl: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/USA/MN.geo.json',
     initialZoom: 13,
     expandedZoom: 11,
-    expandedCenter: [44.9537, -93.1760]  // Center point between Minneapolis and St. Paul
+    expandedCenter: [44.9537, -93.1760],  // Center point between Minneapolis and St. Paul
+    stateZoom: 7,  // Zoom level for viewing all of Minnesota
+    stateCenter: [46.2807, -93.9856]  // Center of Minnesota
 };
 
 class InsuranceMap {
@@ -235,14 +273,11 @@ class InsuranceMap {
                 L.DomEvent.stopPropagation(e);
                 L.DomEvent.preventDefault(e);
                 
-                // Find clicked hospital marker and animate it
                 const markerElement = e.target._icon.querySelector('.hospital-marker');
                 markerElement.classList.add('clicked');
                 setTimeout(() => markerElement.classList.remove('clicked'), 150);
                 
-                // Store which hospital was clicked for coverage update
                 this.lastClickedHospital = hospital.name;
-                
                 this.game.handleClick();
             }
         });
@@ -250,10 +285,20 @@ class InsuranceMap {
         this.hospitals.set(hospital.name, marker);
         
         if (hospital.unlocksAt > 0) {
-            // Animate the map view change when adding second hospital
-            this.map.flyTo(MAP_CONFIG.expandedCenter, MAP_CONFIG.expandedZoom, {
-                duration: 2
-            });
+            // Adjust map view based on number of hospitals
+            const hospitalCount = this.hospitals.size;
+            if (hospitalCount <= 4) {
+                // Stay focused on Twin Cities area
+                this.map.flyTo(MAP_CONFIG.expandedCenter, MAP_CONFIG.expandedZoom, {
+                    duration: 2
+                });
+            } else {
+                // Zoom out to show more of Minnesota
+                this.map.flyTo(MAP_CONFIG.stateCenter, MAP_CONFIG.stateZoom, {
+                    duration: 2
+                });
+            }
+            
             this.game.showEventMessage(`🏥 New Hospital Available: ${hospital.name} in ${hospital.city}!`);
         }
     }
