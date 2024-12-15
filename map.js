@@ -333,11 +333,13 @@ class InsuranceMap {
             
             this.game.showEventMessage(`🏥 New Hospital Available: ${hospital.name} in ${hospital.city}!`);
         }
-        Object.entries(this.game.specializations).forEach(([type, spec]) => {
-            if (spec.level > 0) {
-                this.applySpecializationBonus(hospital, type);
-            }
-        });
+        if (this.game.specializations) {
+            Object.entries(this.game.specializations).forEach(([type, spec]) => {
+                if (spec.level > 0) {
+                    this.applySpecializationBonus(hospital, type);
+                }
+            });
+        }
     }
 
     checkHospitalUnlocks() {

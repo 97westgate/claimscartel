@@ -311,6 +311,28 @@ class Game {
         if (upgradesContainer) {
             upgradesContainer.style.display = 'none'; // Hide initially
         }
+
+        // Initialize specializations
+        this.specializations = {
+            health: {
+                name: "Health Insurance",
+                level: 0,
+                cost: 10000,
+                description: "Specialize in health coverage"
+            },
+            life: {
+                name: "Life Insurance", 
+                level: 0,
+                cost: 25000,
+                description: "Expand into life insurance"
+            },
+            property: {
+                name: "Property Insurance",
+                level: 0,
+                cost: 50000,
+                description: "Offer property coverage"
+            }
+        };
     }
 
     generateAutomaticPolicies() {
@@ -1094,6 +1116,30 @@ class Game {
                 this.updateAllDisplays();
             }
         }, 1000);
+    }
+
+    // Add this new method to handle specialization upgrades
+    upgradeSpecialization(type) {
+        const spec = this.specializations[type];
+        if (spec && this.money >= spec.cost) {
+            this.money -= spec.cost;
+            spec.level++;
+            spec.cost *= 2; // Double the cost for next level
+            
+            // Update hospital coverage for this specialization
+            if (this.map) {
+                this.map.hospitals.forEach((_, hospitalName) => {
+                    const hospital = Object.values(HOSPITALS).find(h => h.name === hospitalName);
+                    if (hospital) {
+                        this.map.applySpecializationBonus(hospital, type);
+                    }
+                });
+            }
+            
+            this.updateDisplay();
+            return true;
+        }
+        return false;
     }
 }
 
